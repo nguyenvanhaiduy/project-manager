@@ -41,4 +41,4 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-/Users/haiduy/development/code/project_manager/lib/firebase_options.dart
+

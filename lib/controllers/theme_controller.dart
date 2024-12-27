@@ -15,7 +15,6 @@ class ThemeController extends GetxController {
       if (storedMode != null) {
         themeMode.value = _getThemeModeFromString(storedMode);
         Get.changeThemeMode(themeMode.value);
-        print(themeMode.value);
       }
     });
   }
@@ -24,7 +23,6 @@ class ThemeController extends GetxController {
     themeMode.value = mode;
     Get.changeThemeMode(mode);
     _storage.write(_key, _getStringFromThemeMode(mode));
-    print(_storage.read(_key));
   }
 
   String _getStringFromThemeMode(ThemeMode mode) {

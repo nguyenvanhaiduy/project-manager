@@ -14,7 +14,7 @@ class LoginScreen extends StatelessWidget {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final themeController = Get.find<ThemeController>();
-  final _authController = Get.find<AuthController>();
+  // final _authController = Get.find<AuthController>();
 
   final emailRegex = RegExp(
     r'^[{0-9}{a-z}{A-Z}.]+@[{0-9}{a-z}{A-Z}]+\.[{0-9}{a-z}{A-Z}]+$',
@@ -32,36 +32,7 @@ class LoginScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Obx(() {
-                if (_authController.currentUser.value?.image != null) {
-                  return CircleAvatar(
-                    minRadius: 30,
-                    maxRadius: 50,
-                    backgroundImage:
-                        _authController.currentUser.value!.image!.image,
-                    onBackgroundImageError: (_, __) => const Icon(
-                      Icons.account_circle,
-                      size: 50,
-                      color: Colors.grey,
-                    ),
-                  );
-                } else if (_authController.currentUser.value?.color != null &&
-                    _authController.currentUser.value?.name != null) {
-                  return CircleAvatar(
-                    minRadius: 30,
-                    maxRadius: 50,
-                    backgroundColor: _authController.currentUser.value!.color,
-                    child: Text(
-                      _authController.currentUser.value!.name[0].toUpperCase(),
-                      style: const TextStyle(fontSize: 40),
-                    ),
-                  );
-                } else {
-                  return const CircleAvatar(
-                    minRadius: 30,
-                    maxRadius: 50,
-                    backgroundImage: AssetImage('assets/images/logo.png'),
-                  );
-                }
+                return _buildUserProfileAvatar();
               }),
               const SizedBox(height: 100),
               customTextField(
@@ -115,7 +86,7 @@ class LoginScreen extends StatelessWidget {
                   children: [
                     MaterialButton(
                       onPressed: () {
-                        Get.to(RegisterScreen());
+                        Get.to(() => RegisterScreen());
                       },
                       child: Text('register'.tr),
                     ),
@@ -133,6 +104,39 @@ class LoginScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildUserProfileAvatar() {
+    if (_authController.currentUser.value?.imageUrl != null) {
+      return CircleAvatar(
+        minRadius: 30,
+        maxRadius: 50,
+        backgroundImage:
+            NetworkImage(_authController.currentUser.value!.imageUrl!),
+        onBackgroundImageError: (_, __) => const Icon(
+          Icons.account_circle,
+          size: 50,
+          color: Colors.grey,
+        ),
+      );
+    } else if (_authController.currentUser.value?.color != null &&
+        _authController.currentUser.value?.name != null) {
+      return CircleAvatar(
+        minRadius: 30,
+        maxRadius: 50,
+        backgroundColor: _authController.currentUser.value!.color,
+        child: Text(
+          _authController.currentUser.value!.name[0].toUpperCase(),
+          style: const TextStyle(fontSize: 40),
+        ),
+      );
+    } else {
+      return const CircleAvatar(
+        minRadius: 30,
+        maxRadius: 50,
+        backgroundImage: AssetImage('assets/images/logo.png'),
+      );
+    }
   }
 }
 
@@ -196,8 +200,6 @@ Widget customTextField(
                             color: Colors.black,
                           ),
                         ),
-                  // fillColor: Colors.amber,
-                  // filled: true,
                 ),
               ),
             ),
@@ -207,24 +209,3 @@ Widget customTextField(
     ),
   );
 }
-
-// Color _getBackgoundColor(
-//     BuildContext context, ThemeController themeController) {
-//   if (themeController.themeMode.value == ThemeMode.light) {
-//     return Colors.white;
-//   } else if (themeController.themeMode.value == ThemeMode.dark) {
-//     return Colors.white10;
-//   }
-//   final brightness = MediaQuery.of(context).platformBrightness;
-//   return brightness == Brightness.light ? Colors.white : Colors.white10;
-// }
-
-// Color _getColorText(BuildContext context, ThemeController themeController) {
-//   if (themeController.themeMode.value == ThemeMode.light) {
-//     return Colors.black;
-//   } else if (themeController.themeMode.value == ThemeMode.dark) {
-//     return Colors.white;
-//   }
-//   final brightness = MediaQuery.of(context).platformBrightness;
-//   return brightness == Brightness.light ? Colors.black : Colors.white;
-// }

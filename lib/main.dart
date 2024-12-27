@@ -12,7 +12,8 @@ import 'package:project_manager/utils/app_translations.dart';
 import 'package:project_manager/views/auths/splash_screen.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding
+      .ensureInitialized(); //  khởi tạo tất cả các kết nối framework cần thiết cho việc sử dụng các plugins.
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -69,44 +70,45 @@ class MyApp extends StatelessWidget {
         ),
       ),
       darkTheme: ThemeData.dark().copyWith(
-          appBarTheme: const AppBarTheme(backgroundColor: kbackgroundDarkColor),
-          scaffoldBackgroundColor: kbackgroundDarkColor,
-          textTheme: const TextTheme().copyWith(
-            bodyMedium: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+        appBarTheme: const AppBarTheme(backgroundColor: kbackgroundDarkColor),
+        scaffoldBackgroundColor: kbackgroundDarkColor,
+        textTheme: const TextTheme().copyWith(
+          bodyMedium: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+          bodyLarge: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        cardTheme: const CardTheme().copyWith(
+          color: Colors.black54,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            backgroundColor: MaterialStateColor.resolveWith(
+              (states) => const Color.fromARGB(255, 31, 57, 111), // Màu tối
             ),
-            bodyLarge: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+            foregroundColor: MaterialStateColor.resolveWith(
+              (states) => Colors.white, // Màu chữ
             ),
           ),
-          cardTheme: const CardTheme().copyWith(
-            color: Colors.black54,
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ButtonStyle(
-              backgroundColor: MaterialStateColor.resolveWith(
-                (states) => const Color.fromARGB(255, 31, 57, 111), // Màu tối
-              ),
-              foregroundColor: MaterialStateColor.resolveWith(
-                (states) => Colors.white, // Màu chữ
-              ),
+        ),
+        listTileTheme: const ListTileThemeData(
+          selectedColor: Colors.amber,
+        ),
+        drawerTheme: const DrawerThemeData(
+          backgroundColor: kbackgroundDarkColor,
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: ButtonStyle(
+            foregroundColor: MaterialStateColor.resolveWith(
+              (states) => Colors.white,
             ),
           ),
-          listTileTheme: const ListTileThemeData(
-            selectedColor: Colors.amber,
-          ),
-          drawerTheme: const DrawerThemeData(
-            backgroundColor: kbackgroundDarkColor,
-          ),
-          textButtonTheme: TextButtonThemeData(
-            style: ButtonStyle(
-              foregroundColor: MaterialStateColor.resolveWith(
-                (states) => Colors.white,
-              ),
-            ),
-          )),
+        ),
+      ),
       initialBinding: BindingsBuilder(() {
         ThemeBinding().dependencies();
         AuthBinding().dependencies();

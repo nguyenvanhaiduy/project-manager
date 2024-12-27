@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 
 import 'package:project_manager/controllers/auth_controller.dart';
 import 'package:project_manager/controllers/theme_controller.dart';
@@ -11,7 +13,6 @@ import 'package:project_manager/views/widgets/widgets.dart';
 
 final _authController = Get.find<AuthController>();
 
-// ignore: must_be_immutable
 class RegisterScreen extends StatelessWidget {
   RegisterScreen({super.key});
 
@@ -23,11 +24,41 @@ class RegisterScreen extends StatelessWidget {
   final emailRegex =
       RegExp(r'^[{0-9}{a-z}{A-Z}.]+@[{0-9}{a-z}{A-Z}]+\.[{0-9}{a-z}{A-Z}]+$');
   final Rx<File?> _image = Rx<File?>(null);
+  final Rx<Uint8List?> _webImage = Rx<Uint8List?>(null);
 
   Future<void> _pickImage(ImageSource source) async {
-    final pickedFile = await ImagePicker().pickImage(source: source);
-    if (pickedFile != null) {
-      _image.value = File(pickedFile.path);
+    print(kIsWeb);
+
+    if (kIsWeb && source == ImageSource.gallery) {
+      print('running on web');
+      try {
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.image,
+          allowMultiple: false,
+        );
+        if (result != null && result.files.isNotEmpty) {
+          PlatformFile file = result.files.first;
+          if (file.bytes != null) {
+            _webImage.value = file.bytes;
+            _image.value = null;
+          }
+        }
+      } catch (e) {
+        print('Error loading file from web $e');
+        Get.snackbar('Error', 'Error loading file: $e');
+      }
+    } else {
+      print('running on web');
+      try {
+        final pickedFile = await ImagePicker().pickImage(source: source);
+        if (pickedFile != null) {
+          _image.value = File(pickedFile.path);
+          _webImage.value = null;
+        }
+      } catch (e) {
+        print('Error picking iamge: $e');
+        Get.snackbar('Error', 'Error picking iamge: $e');
+      }
     }
   }
 
@@ -40,26 +71,39 @@ class RegisterScreen extends StatelessWidget {
           clipBehavior: Clip.hardEdge,
           child: SizedBox(
             width: 300,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                customTextButton(
-                    child: const Icon(Icons.camera),
-                    title: 'camera'.tr,
-                    onPress: () {
-                      _pickImage(ImageSource.camera);
-                      Get.back();
-                    }),
-                customTextButton(
-                    child: const Icon(Icons.photo_library),
-                    title: 'galery'.tr,
-                    onPress: () {
-                      _pickImage(ImageSource.gallery);
-                      Get.back();
-                    })
-              ],
-            ),
+            child: kIsWeb
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      customTextButton(
+                          child: const Icon(Icons.photo_library),
+                          title: 'galery'.tr,
+                          onPress: () {
+                            _pickImage(ImageSource.gallery);
+                            Get.back();
+                          })
+                    ],
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      customTextButton(
+                          child: const Icon(Icons.camera),
+                          title: 'camera'.tr,
+                          onPress: () {
+                            _pickImage(ImageSource.camera);
+                            Get.back();
+                          }),
+                      customTextButton(
+                          child: const Icon(Icons.photo_library),
+                          title: 'galery'.tr,
+                          onPress: () {
+                            _pickImage(ImageSource.gallery);
+                            Get.back();
+                          })
+                    ],
+                  ),
           ),
         ),
       ),
@@ -80,21 +124,30 @@ class RegisterScreen extends StatelessWidget {
                 onTap: () {
                   _showImageSourceDialog(context);
                 },
-                child: Obx(() {
-                  if (_image.value != null) {
-                    return CircleAvatar(
-                      minRadius: 20,
-                      maxRadius: 50,
-                      backgroundImage: FileImage(_image.value!),
-                    );
-                  } else {
+                child: Obx(
+                  () {
+                    if (_image.value != null) {
+                      return CircleAvatar(
+                        minRadius: 20,
+                        maxRadius: 50,
+                        backgroundImage: FileImage(_image.value!),
+                      );
+                    } else if (kIsWeb) {
+                      if (_webImage.value != null) {
+                        return CircleAvatar(
+                          minRadius: 20,
+                          maxRadius: 50,
+                          backgroundImage: MemoryImage(_webImage.value!),
+                        );
+                      }
+                    }
                     return const CircleAvatar(
                       minRadius: 20,
                       maxRadius: 50,
                       backgroundImage: AssetImage('assets/images/logo.png'),
                     );
-                  }
-                }),
+                  },
+                ),
               ),
               const SizedBox(height: 65),
               customTextField(
@@ -142,12 +195,23 @@ class RegisterScreen extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      _authController.signUpWithEmailAndPassword(
-                        _nameController.text,
-                        _image.value,
-                        _emailController.text,
-                        _passwordController.text,
-                      );
+                      if (kIsWeb) {
+                        _authController.signUpWithEmailAndPassword(
+                          _nameController.text,
+                          null,
+                          _webImage.value,
+                          _emailController.text,
+                          _passwordController.text,
+                        );
+                      } else {
+                        _authController.signUpWithEmailAndPassword(
+                          _nameController.text,
+                          _image.value,
+                          null,
+                          _emailController.text,
+                          _passwordController.text,
+                        );
+                      }
                     }
                   },
                   style: ElevatedButton.styleFrom(

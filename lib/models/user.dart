@@ -5,14 +5,14 @@ class User {
   final String id;
   final String name;
   final String email;
-  final Image? image;
+  final String? imageUrl;
   final Color? color;
 
   User({
     required this.id,
     required this.name,
     required this.email,
-    this.image,
+    this.imageUrl,
     this.color,
   });
 
@@ -21,8 +21,14 @@ class User {
       id: data['id'],
       name: data['name'],
       email: data['email'],
-      image: data['image'],
-      color: data['color'],
+      imageUrl: data['imageUrl'],
+      color: data['color'] != null
+          ? (RegExp(r'^#[0-9a-fA-F]{6}$').hasMatch(data['color'])
+              ? Color(
+                  int.parse(data['color'].toString().substring(1), radix: 16) +
+                      0xFF000000)
+              : null)
+          : null,
     );
   }
 
@@ -31,8 +37,8 @@ class User {
       'id': const Uuid().v4(),
       'name': name,
       'email': email,
-      'image': image,
-      'color': color,
+      'imageUrl': imageUrl,
+      'color': '#${color!.value.toRadixString(16).substring(2, 8)}',
     };
   }
 }

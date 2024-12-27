@@ -85,54 +85,20 @@ class CustomDrawer extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                // leading: CircleAvatar(
-                //   radius: 30,
-                //   backgroundImage: const AssetImage('assets/profile.jpg'),
-                //   onBackgroundImageError: (_, __) => const Icon(
-                //     Icons.account_circle,
-                //     size: 50,
-                //     color: Colors.white,
-                //   ),
-                // ),
                 leading: Obx(() {
-                  if (authController.currentUser.value?.image != null) {
-                    return CircleAvatar(
-                      radius: 30,
-                      backgroundImage:
-                          authController.currentUser.value?.image!.image,
-                      onBackgroundImageError: (_, __) =>
-                          const Icon(Icons.account_circle),
-                    );
-                  } else if (authController.currentUser.value?.color != null &&
-                      authController.currentUser.value?.name != null) {
-                    return CircleAvatar(
-                      radius: 30,
-                      backgroundColor: authController.currentUser.value!.color,
-                      child: Text(
-                        authController.currentUser.value!.name[0].toUpperCase(),
-                      ),
-                    );
-                  } else {
-                    return CircleAvatar(
-                      radius: 30,
-                      backgroundImage: const AssetImage('assets/profile.jpg'),
-                      onBackgroundImageError: (_, __) => const Icon(
-                        Icons.account_circle,
-                        size: 50,
-                      ),
-                    );
-                  }
+                  return _buildUserProfileAvatar();
                 }),
-                title: Text(
-                  authController.currentUser.value?.name ?? '',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 17,
-                    color: Theme.of(Get.context!).brightness == Brightness.light
-                        ? Colors.black87
-                        : Colors.white,
-                  ),
-                ),
+                title: Obx(() => Text(
+                      authController.currentUser.value?.name ?? 'user',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                        color: Theme.of(Get.context!).brightness ==
+                                Brightness.light
+                            ? Colors.black87
+                            : Colors.white,
+                      ),
+                    )),
                 subtitle: Text(
                   'Software Developer',
                   style: TextStyle(
@@ -200,6 +166,38 @@ class CustomDrawer extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildUserProfileAvatar() {
+    if (authController.currentUser.value?.imageUrl != null) {
+      return CircleAvatar(
+        minRadius: 20,
+        maxRadius: 50,
+        backgroundImage:
+            NetworkImage(authController.currentUser.value!.imageUrl!),
+        onBackgroundImageError: (_, __) => const Icon(Icons.account_circle),
+      );
+    } else if (authController.currentUser.value?.color != null &&
+        authController.currentUser.value?.name != null) {
+      return CircleAvatar(
+        minRadius: 20,
+        maxRadius: 50,
+        backgroundColor: authController.currentUser.value!.color,
+        child: Text(
+          authController.currentUser.value!.name[0].toUpperCase(),
+        ),
+      );
+    } else {
+      return CircleAvatar(
+        minRadius: 20,
+        maxRadius: 50,
+        backgroundImage: const AssetImage('assets/icons/icon_vietname.png'),
+        onBackgroundImageError: (_, __) => const Icon(
+          Icons.account_circle,
+          size: 50,
+        ),
+      );
+    }
   }
 
   Widget _buildTagTile() {

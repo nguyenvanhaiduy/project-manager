@@ -364,12 +364,12 @@ class ProfileCardPage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: ListTile(
-                      leading: const CircleAvatar(
+                    child: const ListTile(
+                      leading: CircleAvatar(
                         radius: 30,
                         backgroundImage: AssetImage('assets/profile.jpg'),
                       ),
-                      title: const Text(
+                      title: Text(
                         'Hải Duy',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
@@ -377,11 +377,11 @@ class ProfileCardPage extends StatelessWidget {
                           color: Colors.white,
                         ),
                       ),
-                      subtitle: const Text(
+                      subtitle: Text(
                         'Software Developer',
                         style: TextStyle(color: Colors.white70),
                       ),
-                      trailing: const Icon(
+                      trailing: Icon(
                         Icons.arrow_upward,
                         color: Colors.white,
                       ),

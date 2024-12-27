@@ -18,14 +18,13 @@ class LanguageController extends GetxController {
             .firstWhere((locale) => _storage.read(_key) == locale.languageCode);
         currentLocale.value = storedLocale;
         Get.updateLocale(storedLocale);
-        print('test1');
+        // print('test1');
       } else {
         final localed = supportedLocale.firstWhereOrNull((locale) =>
             locale.languageCode == currentLocale.value.languageCode);
         if (localed != null) {
           currentLocale.value = localed;
           Get.updateLocale(localed);
-          print('test2');
         }
       }
     });
