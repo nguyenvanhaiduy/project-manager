@@ -5,12 +5,12 @@ import 'package:get_storage/get_storage.dart';
 class ThemeController extends GetxController {
   final _storage = GetStorage();
   final _key = 'themeMode';
-  var themeMode = ThemeMode.system.obs;
+  Rx<ThemeMode> themeMode = ThemeMode.system.obs;
 
   @override
   void onInit() {
     super.onInit();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       final storedMode = _storage.read(_key);
       if (storedMode != null) {
         themeMode.value = _getThemeModeFromString(storedMode);
@@ -22,29 +22,25 @@ class ThemeController extends GetxController {
   void setThemeMode(ThemeMode mode) {
     themeMode.value = mode;
     Get.changeThemeMode(mode);
-    _storage.write(_key, _getStringFromThemeMode(mode));
-  }
-
-  String _getStringFromThemeMode(ThemeMode mode) {
-    switch (mode) {
-      case ThemeMode.light:
-        return 'light';
-      case ThemeMode.dark:
-        return 'dark';
-      case ThemeMode.system:
-        return 'system';
-    }
+    _storage.write(_key, mode.toString());
   }
 
   ThemeMode _getThemeModeFromString(String mode) {
     switch (mode) {
-      case 'light':
+      case 'ThemeMode.light':
         return ThemeMode.light;
-      case 'dark':
+      case 'ThemeMode.dark':
         return ThemeMode.dark;
-      case 'system':
+      case 'ThemeMode.system':
       default:
+        debugPrint('Warning: Invalid theme mode stored: $mode'); // Thêm warning
         return ThemeMode.system;
     }
+  }
+}
+
+extension ThemeModeExtension on ThemeMode {
+  String toStringThemeMode() {
+    return toString();
   }
 }

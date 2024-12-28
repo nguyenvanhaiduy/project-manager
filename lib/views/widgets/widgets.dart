@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:project_manager/controllers/auth_controller.dart';
+import 'package:project_manager/controllers/drawer_controller.dart';
 import 'package:project_manager/controllers/language_controller.dart';
 import 'package:project_manager/controllers/theme_controller.dart';
-
-final ThemeController themeController = Get.find();
-final LanguageController languageController = Get.find();
 
 Widget customTextButton(
     {required Widget child,
@@ -12,6 +11,8 @@ Widget customTextButton(
     required Function() onPress,
     ThemeMode? themeMode,
     String? name}) {
+  final ThemeController themeController = Get.find();
+  final LanguageController languageController = Get.find();
   return TextButton(
     style: TextButton.styleFrom(
       shape: const RoundedRectangleBorder(),
@@ -35,161 +36,89 @@ Widget customTextButton(
   );
 }
 
-
-/**
- * 
- * 
- * class AuthController extends GetxController {
-  final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  // Khai báo cloudinary instance
-  late Cloudinary _cloudinary;
-
-  // Các thông tin cấu hình Cloudinary
-  final String cloudinaryCloudName = 'dcafv0pxk';
-  final String cloudinaryApiKey = '644694945142125';
-  final String cloudinaryApiSecret = 'pGI2hf7-AP3QsM1gA_rOpQqiTHk';
-
-  var isShowPassword = true.obs;
-
-  Rx<User?> currentUser = Rx<User?>(null);
-
-  @override
-  void onInit() {
-    super.onInit();
-    _cloudinary = Cloudinary.full(
-        cloudName: cloudinaryCloudName,
-        apiKey: cloudinaryApiKey,
-        apiSecret: cloudinaryApiSecret);
-    Future.delayed(const Duration(seconds: 1), () {
-      checkIfUserIsLoggedIn();
-    });
-  }
-
-  void checkIfUserIsLoggedIn() async {
-    final user = _auth.currentUser;
-    print(user);
-    if (user != null) {
-      final userDoc = await _firestore.collection('users').doc(user.uid).get();
-      if (userDoc.exists) {
-        final userData = userDoc.data();
-        currentUser.value = User.fromMap(data: userData!);
-      } else {
-        currentUser.value = User(
-            id: user.uid,
-            name: user.displayName ?? '',
-            email: user.email ?? '');
-      }
-      Get.offAll(() => const ProjectScreen());
-    } else {
-      Get.offAll(() => LoginScreen());
-    }
-  }
-
-  Future<void> signInWithEmailAndPassword(String email, String password) async {
-    try {
-      final credentialUser = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
-      final userdoc = await _firestore
-          .collection('users')
-          .doc(credentialUser.user!.uid)
-          .get();
-      if (userdoc.exists) {
-        currentUser.value = User.fromMap(data: userdoc.data()!);
-      } else {
-        currentUser.value = User(
-          id: credentialUser.user!.uid,
-          name: credentialUser.user!.displayName ?? '',
-          email: credentialUser.user!.email ?? '',
-        );
-      }
-      Get.snackbar('Success', 'Login successful',
-          backgroundColor: Colors.green);
-      Get.offAll(() => const ProjectScreen());
-    } catch (e) {
-      Get.snackbar('Error', e.toString(), backgroundColor: Colors.red);
-    }
-  }
-
-  Future<void> signUpWithEmailAndPassword(
-      String name, File? image, String email, String password) async {
-    try {
-      final credentialUser = await _auth.createUserWithEmailAndPassword(
-          email: email, password: password);
-
-      String? imageUrl;
-      if (image != null) {
-        // Tải ảnh lên Cloudinary
-        try {
-          // ignore: deprecated_member_use
-          final response = await _cloudinary.uploadFile(
-            filePath: image.path,
-            resourceType: CloudinaryResourceType.image,
-          );
-          if (response.isSuccessful) {
-            imageUrl = response.secureUrl;
-          } else {
-            Get.snackbar('Error', 'Failed to upload image to Cloudinary',
-                backgroundColor: Colors.red);
-            return;
-          }
-        } catch (e) {
-          Get.snackbar('Error', 'Failed to upload image to Cloudinary: $e',
-              backgroundColor: Colors.red);
-          return;
-        }
-      }
-      credentialUser.user?.updateDisplayName(name);
-      Color? randomColor = _generateRandomColor();
-      final user = credentialUser.user!;
-      final newUser = User(
-          id: user.uid,
-          name: name,
-          email: email,
-          imageUrl: imageUrl,
-          color: randomColor);
-
-      await _firestore
-          .collection('users')
-          .doc(credentialUser.user!.uid)
-          .set(newUser.toMap());
-      Get.snackbar('Success', 'Login successful',
-          backgroundColor: Colors.green);
-      Get.offAll(() => const ProjectScreen());
-    } catch (e) {
-      Get.snackbar('Error', e.toString(), backgroundColor: Colors.red);
-    }
-  }
-
-  Future<void> resetPassword(String email) async {
-    try {
-      await _auth.sendPasswordResetEmail(email: email);
-    } catch (e) {
-      Get.snackbar('Error', e.toString(), backgroundColor: Colors.red);
-    }
-  }
-
-  Future<void> signOut() async {
-    try {
-      await _auth.signOut();
-      Get.offAll(() => LoginScreen());
-    } catch (e) {
-      Get.snackbar('Error', e.toString());
-    }
-  }
-
-  void showPassword() {
-    isShowPassword.value = !isShowPassword.value;
-  }
-
-  Color _generateRandomColor() {
-    final random = Random();
-    return Color.fromRGBO(
-      random.nextInt(256),
-      random.nextInt(256),
-      random.nextInt(256),
-      1,
-    );
-  }
+Widget customListTile(String title, String id, Widget leading,
+    BorderRadiusGeometry borderRadiusGeometry, Function() onPressed,
+    {Widget? trailing}) {
+  final DrawerrController drawerController = Get.find();
+  return Obx(
+    () => ListTile(
+      key: Key(id),
+      title: Text(title),
+      onTap: onPressed,
+      selected: drawerController.selectedIndex.value == id,
+      shape: RoundedRectangleBorder(
+        borderRadius: borderRadiusGeometry,
+      ),
+      leading: leading,
+      trailing: trailing,
+    ),
+  );
 }
- */
+
+Widget customTextField(
+  BuildContext context,
+  TextEditingController textEditingController,
+  String name,
+  IconData icon,
+  String? Function(String?) onValid,
+  ThemeController themeController, {
+  bool? obscureText = false,
+  IconData? suffixIcon,
+}) {
+  final AuthController authController = Get.find();
+  return Container(
+    decoration: BoxDecoration(
+      color: Theme.of(Get.context!).brightness == Brightness.light
+          ? Colors.white
+          : Colors.white10,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    margin: const EdgeInsets.symmetric(horizontal: 14.0),
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 15,
+          ),
+          child: Text(
+            name.tr,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: textEditingController,
+                obscureText: obscureText ?? false,
+                style: TextStyle(
+                    color: Theme.of(Get.context!).brightness == Brightness.light
+                        ? Colors.black
+                        : Colors.white),
+                validator: onValid,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.all(10),
+                  border: const OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                  ),
+                  prefixIcon: Icon(icon),
+                  suffixIcon: obscureText == null
+                      ? null
+                      : IconButton(
+                          onPressed: authController.showPassword,
+                          icon: Icon(
+                            suffixIcon,
+                            color: Colors.black,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}

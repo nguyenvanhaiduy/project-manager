@@ -3,7 +3,8 @@ import 'package:get/get.dart';
 import 'package:project_manager/controllers/auth_controller.dart';
 import 'package:project_manager/controllers/theme_controller.dart';
 import 'package:project_manager/views/auths/register_screen.dart';
-import 'package:project_manager/views/widgets/custom_drawer.dart';
+import 'package:project_manager/views/widgets/drawer/custom_drawer.dart';
+import 'package:project_manager/views/widgets/widgets.dart';
 
 final _authController = Get.find<AuthController>();
 
@@ -14,11 +15,10 @@ class LoginScreen extends StatelessWidget {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final themeController = Get.find<ThemeController>();
-  // final _authController = Get.find<AuthController>();
 
-  final emailRegex = RegExp(
-    r'^[{0-9}{a-z}{A-Z}.]+@[{0-9}{a-z}{A-Z}]+\.[{0-9}{a-z}{A-Z}]+$',
-  );
+  final emailRegex =
+      RegExp(r'^[{0-9}{a-z}{A-Z}.]+@[{0-9}{a-z}{A-Z}]+\.[{0-9}{a-z}{A-Z}]+$');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,9 +67,9 @@ class LoginScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 15),
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      _authController.signInWithEmailAndPassword(
+                      await _authController.signInWithEmailAndPassword(
                           _emailController.text, _passwordController.text);
                     }
                   },
@@ -97,8 +97,6 @@ class LoginScreen extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // const Spacer(),
             ],
           ),
         ),
@@ -138,74 +136,4 @@ class LoginScreen extends StatelessWidget {
       );
     }
   }
-}
-
-Widget customTextField(
-  BuildContext context,
-  TextEditingController textEditingController,
-  String name,
-  IconData icon,
-  String? Function(String?) onValid,
-  ThemeController themeController, {
-  bool? obscureText = false,
-  IconData? suffixIcon,
-}) {
-  return Container(
-    decoration: BoxDecoration(
-      color: Theme.of(Get.context!).brightness == Brightness.light
-          ? Colors.white
-          : Colors.white10,
-      borderRadius: BorderRadius.circular(20),
-    ),
-    margin: const EdgeInsets.symmetric(horizontal: 14.0),
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 15,
-          ),
-          child: Text(
-            name.tr,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ),
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: textEditingController,
-                obscureText: obscureText ?? false,
-                style: TextStyle(
-                    color: Theme.of(Get.context!).brightness == Brightness.light
-                        ? Colors.black
-                        : Colors.white),
-                validator: onValid,
-                decoration: InputDecoration(
-                  // labelStyle:
-                  //     const TextStyle(fontSize: 18, color: Colors.black),
-                  contentPadding: const EdgeInsets.all(10),
-
-                  border: const OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                  ),
-                  prefixIcon: Icon(icon),
-                  suffixIcon: obscureText == null
-                      ? null
-                      : IconButton(
-                          onPressed: _authController.showPassword,
-                          icon: Icon(
-                            suffixIcon,
-                            color: Colors.black,
-                          ),
-                        ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
 }

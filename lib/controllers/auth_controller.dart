@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloudinary_sdk/cloudinary_sdk.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
@@ -18,7 +20,8 @@ class AuthController extends GetxController {
   final String cloudinaryCloudName = 'dcafv0pxk';
   final String cloudinaryApiKey = '644694945142125';
   final String cloudinaryApiSecret = 'pGI2hf7-AP3QsM1gA_rOpQqiTHk';
-  var isShowPassword = true.obs;
+
+  RxBool isShowPassword = true.obs;
 
   Rx<User?> currentUser = Rx<User?>(null);
 
@@ -52,10 +55,53 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<String?> _uploadImage(dynamic imageFile) async {
+    if (imageFile == null) {
+      return null;
+    }
+    try {
+      CloudinaryResponse? response;
+      if (imageFile is File) {
+        response = await _cloudinary.uploadResource(CloudinaryUploadResource(
+          filePath: imageFile.path,
+          resourceType: CloudinaryResourceType.auto,
+        ));
+      } else if (imageFile is Uint8List) {
+        response = await _cloudinary.uploadResource(CloudinaryUploadResource(
+          fileBytes: imageFile,
+          resourceType: CloudinaryResourceType.auto,
+        ));
+      }
+      if (response != null && response.isSuccessful) {
+        return response.secureUrl;
+      } else {
+        Get.snackbar('Error', 'Cloundiary upload failed: ${response?.error}');
+        throw Exception('Cloundiary upload failed: ${response?.error}');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Error upload image: $e');
+      throw Exception('Error upload image: $e');
+    }
+  }
+
   Future<void> signInWithEmailAndPassword(String email, String password) async {
     try {
-      final credentialUser = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
+      Get.dialog(
+        barrierDismissible: false,
+        const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+      final credentialUser = await _auth
+          .signInWithEmailAndPassword(email: email, password: password)
+          .timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          Get.back();
+          throw TimeoutException('Login time out. Please try again.');
+        },
+      );
+
       final userDoc = await _firestore
           .collection('users')
           .doc(credentialUser.user!.uid)
@@ -69,9 +115,16 @@ class AuthController extends GetxController {
             name: user.displayName ?? '',
             email: user.email ?? '');
       }
+      Get.back();
       Get.snackbar('Success', 'Login Success', backgroundColor: Colors.green);
       Get.offAll(() => const ProjectScreen());
+    } on TimeoutException catch (e) {
+      Get.back();
+      Get.closeAllSnackbars();
+      Get.snackbar('Error', e.toString(), backgroundColor: Colors.red);
     } catch (e) {
+      Get.back();
+      Get.closeAllSnackbars();
       Get.snackbar('Error', e.toString(), backgroundColor: Colors.red);
     }
   }
@@ -79,85 +132,46 @@ class AuthController extends GetxController {
   Future<void> signUpWithEmailAndPassword(String name, File? image,
       Uint8List? webImage, String email, String password) async {
     try {
-      final credentialUser = await _auth.createUserWithEmailAndPassword(
-          email: email, password: password);
+      Get.dialog(
+        barrierDismissible: false,
+        const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+      final credentialUser = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password)
+          .timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          Get.back();
+          throw TimeoutException('Sign up time out. Please try again.');
+        },
+      );
       String? imageUrl;
       credentialUser.user!.updateDisplayName(name);
-      if (image != null || webImage != null) {
-        try {
-          CloudinaryResponse? response;
-          if (image != null) {
-            response = await _cloudinary.uploadResource(
-              CloudinaryUploadResource(
-                  filePath: image.path,
-                  resourceType: CloudinaryResourceType.auto),
-            );
-          } else if (webImage != null && !kIsWeb) {
-            // final tempDir = await getTemporaryDirectory();
-            // final tempFile = File(
-            //     '${tempDir.path}/${const Uuid().v4()}${p.extension('file')}');
-            // print('tempFile $tempFile');
-            // await tempFile.writeAsBytes(webImage);
-            // response = await _cloudinary.uploadResource(
-            //   CloudinaryUploadResource(
-            //       filePath: tempFile.path,
-            //       resourceType: CloudinaryResourceType.auto),
-            // );
-            // tempFile.delete();
-            response = await _cloudinary.uploadResource(
-              CloudinaryUploadResource(
-                fileBytes: webImage,
-                resourceType: CloudinaryResourceType.auto,
-              ),
-            );
-          } else if (kIsWeb && webImage != null) {
-            response = await _cloudinary.uploadResource(
-              CloudinaryUploadResource(
-                fileBytes: webImage,
-                resourceType: CloudinaryResourceType.auto,
-              ),
-            );
-          }
-          if (response != null && response.isSuccessful) {
-            imageUrl = response.secureUrl;
-            final user = credentialUser.user!;
-            User newUser = User(
-              id: user.uid,
-              name: name,
-              email: email,
-              imageUrl: imageUrl,
-              color: _generateRandomColor(),
-            );
-            await _firestore
-                .collection('users')
-                .doc(user.uid)
-                .set(newUser.toMap());
-            Get.snackbar('Success', 'Login successful',
-                backgroundColor: Colors.green);
-            Get.offAll(() => const ProjectScreen());
-          } else {
-            Get.snackbar('Error', 'Failed to upload image to Cloudinary',
-                backgroundColor: Colors.red);
-          }
-        } catch (e) {
-          Get.snackbar('Error', 'Failed to upload image to Cloudinary: $e',
-              backgroundColor: Colors.red);
-        }
-      } else {
-        final user = credentialUser.user!;
-        User newUser = User(
-          id: user.uid,
-          name: name,
-          email: email,
-          imageUrl: imageUrl,
-          color: _generateRandomColor(),
-        );
-        await _firestore.collection('users').doc(user.uid).set(newUser.toMap());
-        Get.snackbar('Success', 'Login successful',
-            backgroundColor: Colors.green);
-        Get.offAll(() => const ProjectScreen());
-      }
+      imageUrl = await _uploadImage(image ?? webImage);
+      final user = credentialUser.user!;
+      User newUser = User(
+        id: user.uid,
+        name: name,
+        email: email,
+        imageUrl: imageUrl,
+        color: _generateRandomColor(),
+      );
+      currentUser.value = newUser;
+      await _firestore.collection('users').doc(user.uid).set(newUser.toMap());
+      Get.back();
+      Get.snackbar('Success', 'Login successful',
+          backgroundColor: Colors.green);
+      Get.offAll(() => const ProjectScreen());
+      Get.back();
+    } on TimeoutException catch (e) {
+      Get.back();
+      Get.closeAllSnackbars();
+      Get.snackbar('Error', e.toString(), backgroundColor: Colors.red);
     } catch (e) {
+      Get.back();
+      Get.closeAllSnackbars();
       Get.snackbar('Error', e.toString(), backgroundColor: Colors.red);
     }
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project_manager/views/widgets/custom_drawer.dart';
+import 'package:project_manager/views/widgets/drawer/custom_drawer.dart';
 
 class ProjectScreen extends StatelessWidget {
   const ProjectScreen({super.key});
