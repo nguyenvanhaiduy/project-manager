@@ -117,10 +117,6 @@ class MyApp extends StatelessWidget {
       }),
       home: const SplashScreen(),
       translations: AppTranslations(),
-      // translationsKeys: const {
-      //   'en_US': enUs,
-      //   'vi_VN': viVn,
-      // },
       locale: const Locale('en', 'US'),
       fallbackLocale: const Locale('vi', 'VN'),
     );

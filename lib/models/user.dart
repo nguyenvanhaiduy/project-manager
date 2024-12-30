@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 class User {
   final String id;
   final String name;
+  final String job;
   final String email;
   final String? imageUrl;
   final Color? color;
@@ -11,6 +12,7 @@ class User {
   User({
     required this.id,
     required this.name,
+    required this.job,
     required this.email,
     this.imageUrl,
     this.color,
@@ -20,6 +22,7 @@ class User {
     return User(
       id: data['id'],
       name: data['name'],
+      job: data['job'],
       email: data['email'],
       imageUrl: data['imageUrl'],
       color: data['color'] != null
@@ -36,6 +39,7 @@ class User {
     return {
       'id': const Uuid().v4(),
       'name': name,
+      'job': job,
       'email': email,
       'imageUrl': imageUrl,
       'color': '#${color!.value.toRadixString(16).substring(2, 8)}',

@@ -4,13 +4,16 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloudinary_sdk/cloudinary_sdk.dart';
+import 'package:email_otp/email_otp.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:project_manager/controllers/resend_controller.dart';
+import 'package:project_manager/views/auths/verification_code.dart';
 import 'package:project_manager/models/user.dart';
 import 'package:project_manager/views/auths/login_screen.dart';
 import 'package:project_manager/views/projects/project_screen.dart';
-import 'package:flutter/foundation.dart';
 
 class AuthController extends GetxController {
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
@@ -22,17 +25,31 @@ class AuthController extends GetxController {
   final String cloudinaryApiSecret = 'pGI2hf7-AP3QsM1gA_rOpQqiTHk';
 
   RxBool isShowPassword = true.obs;
-
   Rx<User?> currentUser = Rx<User?>(null);
+
+  final ResendController resendController = Get.put(ResendController());
+
+  bool get resendActive => resendController.isResendActive.value;
+  int get time => resendController.time.value;
 
   @override
   void onInit() {
     super.onInit();
+
+    EmailOTP.config(
+      appName: 'Project Manager',
+      otpType: OTPType.numeric,
+      otpLength: 5,
+      emailTheme: EmailTheme.v3,
+      expiry: 60000,
+    );
+
     _cloudinary = Cloudinary.full(
       apiKey: cloudinaryApiKey,
       apiSecret: cloudinaryApiSecret,
       cloudName: cloudinaryCloudName,
     );
+
     Future.delayed(const Duration(seconds: 1), () => checkIfUserIsLoggedIn());
   }
 
@@ -43,13 +60,8 @@ class AuthController extends GetxController {
       if (userDoc.exists) {
         final userData = userDoc.data();
         currentUser.value = User.fromMap(data: userData!);
-      } else {
-        currentUser.value = User(
-            id: user.uid,
-            name: user.displayName ?? '',
-            email: user.email ?? '');
+        Get.offAll(() => const ProjectScreen());
       }
-      Get.offAll(() => const ProjectScreen());
     } else {
       Get.offAll(() => LoginScreen());
     }
@@ -108,28 +120,79 @@ class AuthController extends GetxController {
           .get();
       if (userDoc.exists) {
         currentUser.value = User.fromMap(data: userDoc.data()!);
-      } else {
-        final user = credentialUser.user!;
-        currentUser.value = User(
-            id: user.uid,
-            name: user.displayName ?? '',
-            email: user.email ?? '');
+        Get.back();
+        Get.snackbar('Success', 'Login Success', colorText: Colors.green);
+        Get.offAll(() => const ProjectScreen());
       }
-      Get.back();
-      Get.snackbar('Success', 'Login Success', backgroundColor: Colors.green);
-      Get.offAll(() => const ProjectScreen());
     } on TimeoutException catch (e) {
       Get.back();
       Get.closeAllSnackbars();
-      Get.snackbar('Error', e.toString(), backgroundColor: Colors.red);
+      Get.snackbar('Error', e.toString(), colorText: Colors.red);
     } catch (e) {
       Get.back();
       Get.closeAllSnackbars();
-      Get.snackbar('Error', e.toString(), backgroundColor: Colors.red);
+      Get.snackbar('Error', e.toString(), colorText: Colors.red);
     }
   }
 
-  Future<void> signUpWithEmailAndPassword(String name, File? image,
+  void goToVerificationScreen(String name, String job, File? image,
+      Uint8List? webImage, String email, String password) async {
+    Get.dialog(
+      barrierDismissible: false,
+      const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    try {
+      final querySnapShot = await _firestore
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+      if (querySnapShot.docs.isEmpty) {
+        if (await EmailOTP.sendOTP(email: email)) {
+          Get.back();
+          Get.to(() => VerificationCode(
+                email: email,
+                name: name,
+                job: job,
+                image: image,
+                webImage: webImage,
+                password: password,
+              ));
+          resendController.startTimer();
+        } else {
+          Get.back();
+        }
+      } else {
+        Get.closeAllSnackbars();
+        Get.back();
+        Get.snackbar(
+          'Error',
+          'Email address already in use',
+          colorText: Colors.red,
+        );
+      }
+    } catch (e) {
+      Get.closeAllSnackbars();
+      Get.back();
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        colorText: Colors.red,
+      );
+    }
+  }
+
+  void resendCode(String email) async {
+    if (!resendController.isResendActive.value) return;
+    await EmailOTP.sendOTP(email: email);
+    resendController.resetTimer();
+    resendController.startTimer();
+  }
+
+  Future<void> signUpWithEmailAndPassword(String name, String job, File? image,
       Uint8List? webImage, String email, String password) async {
     try {
       Get.dialog(
@@ -154,6 +217,7 @@ class AuthController extends GetxController {
       User newUser = User(
         id: user.uid,
         name: name,
+        job: job,
         email: email,
         imageUrl: imageUrl,
         color: _generateRandomColor(),
@@ -161,18 +225,16 @@ class AuthController extends GetxController {
       currentUser.value = newUser;
       await _firestore.collection('users').doc(user.uid).set(newUser.toMap());
       Get.back();
-      Get.snackbar('Success', 'Login successful',
-          backgroundColor: Colors.green);
+      Get.snackbar('Success', 'Login successful', colorText: Colors.green);
       Get.offAll(() => const ProjectScreen());
-      Get.back();
     } on TimeoutException catch (e) {
       Get.back();
       Get.closeAllSnackbars();
-      Get.snackbar('Error', e.toString(), backgroundColor: Colors.red);
+      Get.snackbar('Error', e.toString(), colorText: Colors.red);
     } catch (e) {
       Get.back();
       Get.closeAllSnackbars();
-      Get.snackbar('Error', e.toString(), backgroundColor: Colors.red);
+      Get.snackbar('Error', e.toString(), colorText: Colors.red);
     }
   }
 

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_manager/controllers/auth_controller.dart';
@@ -14,7 +15,6 @@ class ProfileCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(microseconds: 300),
         curve: Curves.linear,
-        // height: 100,
         margin: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
           color: Get.isDarkMode ? Colors.black38 : Colors.white,
@@ -36,7 +36,7 @@ class ProfileCard extends StatelessWidget {
                 () => Text(authController.currentUser.value?.name ?? 'user'),
               ),
               subtitle: Obx(
-                () => Text(authController.currentUser.value?.email ?? 'user'),
+                () => Text(authController.currentUser.value?.job ?? 'job'),
               ),
             ),
             const Divider(
@@ -58,7 +58,8 @@ class ProfileCard extends StatelessWidget {
                   icon: const Icon(Icons.edit),
                 ),
               ],
-            )
+            ),
+            kIsWeb ? const SizedBox(height: 8) : const SizedBox(),
           ],
         ),
       ),

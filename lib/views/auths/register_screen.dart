@@ -17,8 +17,10 @@ class RegisterScreen extends StatelessWidget {
 
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _jobController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _themeController = Get.find<ThemeController>();
   final emailRegex =
       RegExp(r'^[{0-9}{a-z}{A-Z}.]+@[{0-9}{a-z}{A-Z}]+\.[{0-9}{a-z}{A-Z}]+$');
@@ -113,130 +115,157 @@ class RegisterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 50),
-              GestureDetector(
-                onTap: () {
-                  _showImageSourceDialog(context);
-                },
-                child: Obx(
-                  () {
-                    if (_image.value != null) {
-                      return CircleAvatar(
-                        minRadius: 20,
-                        maxRadius: 50,
-                        backgroundImage: FileImage(_image.value!),
-                      );
-                    } else if (kIsWeb) {
-                      if (_webImage.value != null) {
-                        return CircleAvatar(
+      body: Center(
+        child: Form(
+          key: _formKey,
+          child: SizedBox(
+            width: 400,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      _showImageSourceDialog(context);
+                    },
+                    child: Obx(
+                      () {
+                        if (_image.value != null) {
+                          return CircleAvatar(
+                            minRadius: 20,
+                            maxRadius: 50,
+                            backgroundImage: FileImage(_image.value!),
+                          );
+                        } else if (kIsWeb) {
+                          if (_webImage.value != null) {
+                            return CircleAvatar(
+                              minRadius: 20,
+                              maxRadius: 50,
+                              backgroundImage: MemoryImage(_webImage.value!),
+                            );
+                          }
+                        }
+                        return const CircleAvatar(
                           minRadius: 20,
                           maxRadius: 50,
-                          backgroundImage: MemoryImage(_webImage.value!),
+                          backgroundImage: AssetImage('assets/images/logo.png'),
                         );
-                      }
-                    }
-                    return const CircleAvatar(
-                      minRadius: 20,
-                      maxRadius: 50,
-                      backgroundImage: AssetImage('assets/images/logo.png'),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 65),
-              customTextField(
-                  context, _nameController, 'fullname', Icons.person_outline,
-                  (value) {
-                if (value == null || value.isEmpty) {
-                  return 'you must enter your full name'.tr;
-                }
-                return null;
-              }, _themeController),
-              const SizedBox(height: 20),
-              // const Spacer(),
-              customTextField(
-                  context, _emailController, 'email', Icons.email_outlined,
-                  (value) {
-                if (value == null || value.isEmpty) {
-                  return 'you must enter your email'.tr;
-                }
-
-                if (!emailRegex.hasMatch(value)) {
-                  return 'you must enter a valid email'.tr;
-                }
-                return null;
-              }, _themeController),
-              const SizedBox(height: 20),
-
-              Obx(() => customTextField(context, _passwordController,
-                      'password', Icons.lock_outline,
-                      obscureText: _authController.isShowPassword.value,
-                      suffixIcon: _authController.isShowPassword.value
-                          ? Icons.remove_red_eye
-                          : Icons.remove_red_eye_outlined, (value) {
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  customTextField(context, _nameController, 'fullname',
+                      Icons.person_outline, (value) {
                     if (value == null || value.isEmpty) {
-                      return 'you must enter your password'.tr;
-                    }
-                    if (value.length < 6) {
-                      return 'password must be greater than 6 characters'.tr;
+                      return 'you must enter your full name'.tr;
                     }
                     return null;
-                  }, _themeController)),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      if (kIsWeb) {
-                        _authController.signUpWithEmailAndPassword(
-                          _nameController.text,
-                          null,
-                          _webImage.value,
-                          _emailController.text,
-                          _passwordController.text,
-                        );
-                      } else {
-                        _authController.signUpWithEmailAndPassword(
-                          _nameController.text,
-                          _image.value,
-                          null,
-                          _emailController.text,
-                          _passwordController.text,
-                        );
-                      }
+                  }, _themeController),
+                  const SizedBox(height: 20),
+                  customTextField(context, _jobController, 'job', Icons.work,
+                      (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'you must enter your job'.tr;
                     }
-                  },
-                  style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.all(15)),
-                  child: Text('register'.tr),
-                ),
-              ),
-              const SizedBox(height: 20),
+                    return null;
+                  }, _themeController),
+                  const SizedBox(height: 20),
+                  // const Spacer(),
+                  customTextField(
+                    context,
+                    _emailController,
+                    'email',
+                    Icons.email_outlined,
+                    (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'you must enter your email'.tr;
+                      }
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('You have already an account?'.tr),
-                    MaterialButton(
-                      onPressed: () {
-                        Get.back();
+                      if (!emailRegex.hasMatch(value)) {
+                        return 'you must enter a valid email'.tr;
+                      }
+                      return null;
+                    },
+                    _themeController,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: 20),
+
+                  Obx(() => customTextField(context, _passwordController,
+                          'password', Icons.lock_outline,
+                          obscureText: _authController.isShowPassword.value,
+                          suffixIcon: _authController.isShowPassword.value
+                              ? Icons.remove_red_eye
+                              : Icons.remove_red_eye_outlined, (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'you must enter password'.tr;
+                        }
+                        if (value.length < 6) {
+                          return 'password must be greater than 6 characters'
+                              .tr;
+                        }
+                        return null;
+                      }, _themeController)),
+                  const SizedBox(height: 20),
+                  Obx(
+                    () => customTextField(context, _confirmPasswordController,
+                        'confirm password'.tr, Icons.lock_outline,
+                        obscureText: _authController.isShowPassword.value,
+                        suffixIcon: _authController.isShowPassword.value
+                            ? Icons.remove_red_eye
+                            : Icons.remove_red_eye_outlined, (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'you must enter confirm password'.tr;
+                      }
+                      if (value != _passwordController.text) {
+                        return 'password and confirm password must be same'.tr;
+                      }
+                      return null;
+                    }, _themeController),
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    width: double.infinity,
+                    height: kIsWeb ? 50 : null,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          _authController.goToVerificationScreen(
+                            _nameController.text,
+                            _jobController.text,
+                            _image.value,
+                            _webImage.value,
+                            _emailController.text,
+                            _passwordController.text,
+                          );
+                        }
                       },
-                      child: Text('login'.tr),
-                    )
-                  ],
-                ),
+                      style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.all(15)),
+                      child: Text('register'.tr),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('You have already an account?'.tr),
+                        MaterialButton(
+                          onPressed: () {
+                            Get.back();
+                          },
+                          child: Text('login'.tr),
+                        )
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                ],
               ),
-              // const Spacer(),
-            ],
+            ),
           ),
         ),
       ),

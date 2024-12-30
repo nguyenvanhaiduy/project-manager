@@ -15,7 +15,9 @@ const Map<String, String> enUs = {
   'select_language': 'Select Language',
   'fullname': 'Fullname',
   'email': 'Email',
+  'job': 'Job',
   'password': 'Password',
+  'confirm password': 'Confirm Password',
   'forgot password': 'Forgot Password?',
   'not having account? sign up!': 'Not having account? Sign up!',
   'theme': 'Theme',
@@ -25,11 +27,15 @@ const Map<String, String> enUs = {
   'system': 'Use system setting',
   'add_project': 'Add Project',
   'you must enter your full name': 'You must enter your full name',
+  'you must enter your job': 'You must enter your job',
   'you must enter your email': 'You must enter your email',
   'you must enter a valid email': 'You must enter a valid email',
-  'you must enter your password': 'You must enter your password',
+  'you must enter password': 'You must enter password',
   'password must be greater than 6 characters':
       'Password must be greater than 6 characters',
+  'you must enter confirm password': 'You must enter confirm password',
+  'password and confirm password must be same':
+      'Password and confirm password must be same',
   'your project': 'Your Project',
   'project manager': 'Project Manager',
   'tag': 'Tag',
@@ -42,4 +48,13 @@ const Map<String, String> enUs = {
   'camera': 'Camera',
   'gallery': 'Gallery',
   'select image source': 'Select image source',
+  'verification code': 'Verification Code',
+  'we have sent the code verification to':
+      'We have sent the code verification to',
+  'resend': 'Resend',
+  'confirm': 'Confirm',
+  'forgot_password': 'Forgot password',
+  'send_reset_link': 'Send reset link',
+  'please enter your email address to receive a password reset link.':
+      'Please enter your email address to receive a password reset link'
 };

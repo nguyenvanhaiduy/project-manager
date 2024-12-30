@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:project_manager/controllers/auth_controller.dart';
 import 'package:project_manager/controllers/drawer_controller.dart';
@@ -64,6 +65,7 @@ Widget customTextField(
   ThemeController themeController, {
   bool? obscureText = false,
   IconData? suffixIcon,
+  TextInputType keyboardType = TextInputType.text,
 }) {
   final AuthController authController = Get.find();
   return Container(
@@ -93,6 +95,7 @@ Widget customTextField(
               child: TextFormField(
                 controller: textEditingController,
                 obscureText: obscureText ?? false,
+                keyboardType: keyboardType,
                 style: TextStyle(
                     color: Theme.of(Get.context!).brightness == Brightness.light
                         ? Colors.black
@@ -104,7 +107,7 @@ Widget customTextField(
                     borderSide: BorderSide.none,
                   ),
                   prefixIcon: Icon(icon),
-                  suffixIcon: obscureText == null
+                  suffixIcon: suffixIcon == null
                       ? null
                       : IconButton(
                           onPressed: authController.showPassword,
@@ -118,6 +121,39 @@ Widget customTextField(
             ),
           ],
         ),
+      ],
+    ),
+  );
+}
+
+Widget customTextFieldVerify(BuildContext context,
+    TextEditingController controller, ValueChanged<String>? onChanged) {
+  return Container(
+    height: 50,
+    width: 50,
+    decoration: BoxDecoration(
+        color: Get.isDarkMode ? Colors.white10 : Colors.white,
+        borderRadius: BorderRadius.circular(4)),
+    child: TextFormField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      textAlign: TextAlign.center,
+      decoration: const InputDecoration(
+          border: InputBorder.none, contentPadding: EdgeInsets.all(2)),
+      onChanged: (value) {
+        if (onChanged != null) {
+          onChanged(value);
+        }
+        if (value.length == 1) {
+          FocusScope.of(context).nextFocus();
+        }
+        if (value.isEmpty) {
+          FocusScope.of(context).previousFocus();
+        }
+      },
+      inputFormatters: [
+        LengthLimitingTextInputFormatter(1),
+        FilteringTextInputFormatter.digitsOnly,
       ],
     ),
   );

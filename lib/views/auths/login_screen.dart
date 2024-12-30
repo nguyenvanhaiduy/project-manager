@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_manager/controllers/auth_controller.dart';
 import 'package:project_manager/controllers/theme_controller.dart';
+import 'package:project_manager/views/auths/forgot_password.dart';
 import 'package:project_manager/views/auths/register_screen.dart';
 import 'package:project_manager/views/widgets/drawer/custom_drawer.dart';
 import 'package:project_manager/views/widgets/widgets.dart';
@@ -24,80 +26,104 @@ class LoginScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(),
       drawer: CustomDrawer(isLogout: false),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Obx(() {
-                return _buildUserProfileAvatar();
-              }),
-              const SizedBox(height: 100),
-              customTextField(
-                  context, _emailController, 'email', Icons.email_outlined,
-                  (value) {
-                if (value == null || value.isEmpty) {
-                  return 'you must enter your email'.tr;
-                }
+      body: Center(
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              // crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Obx(() {
+                  return _buildUserProfileAvatar();
+                }),
+                const SizedBox(height: 50),
+                SizedBox(
+                  width: 400,
+                  child: Center(
+                    child: Column(
+                      children: [
+                        customTextField(
+                          context,
+                          _emailController,
+                          'email',
+                          Icons.email_outlined,
+                          (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'you must enter your email'.tr;
+                            }
 
-                if (!emailRegex.hasMatch(value)) {
-                  return 'you must enter a valid email'.tr;
-                }
-                return null;
-              }, themeController),
-              const SizedBox(height: 20),
-              Obx(() => customTextField(context, _passwordController,
-                      'password', Icons.lock_outline,
-                      obscureText: _authController.isShowPassword.value,
-                      suffixIcon: _authController.isShowPassword.value
-                          ? Icons.remove_red_eye
-                          : Icons.remove_red_eye_outlined, (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'you must enter a password'.tr;
-                    }
-                    if (value.length < 6) {
-                      return 'password must be greater than 6 characters'.tr;
-                    }
-                    return null;
-                  }, themeController)),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      await _authController.signInWithEmailAndPassword(
-                          _emailController.text, _passwordController.text);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.all(15)),
-                  child: Text('login'.tr),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    MaterialButton(
-                      onPressed: () {
-                        Get.to(() => RegisterScreen());
-                      },
-                      child: Text('register'.tr),
+                            if (!emailRegex.hasMatch(value)) {
+                              return 'you must enter a valid email'.tr;
+                            }
+                            return null;
+                          },
+                          themeController,
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+                        const SizedBox(height: 20),
+                        Obx(() => customTextField(context, _passwordController,
+                                'password', Icons.lock_outline,
+                                obscureText:
+                                    _authController.isShowPassword.value,
+                                suffixIcon: _authController.isShowPassword.value
+                                    ? Icons.remove_red_eye
+                                    : Icons.remove_red_eye_outlined, (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'you must enter password'.tr;
+                              }
+                              if (value.length < 6) {
+                                return 'password must be greater than 6 characters'
+                                    .tr;
+                              }
+                              return null;
+                            }, themeController)),
+                        const SizedBox(height: 20),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          width: double.infinity,
+                          height: kIsWeb ? 50 : null,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              if (_formKey.currentState!.validate()) {
+                                await _authController
+                                    .signInWithEmailAndPassword(
+                                        _emailController.text,
+                                        _passwordController.text);
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.all(15)),
+                            child: Text('login'.tr),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              MaterialButton(
+                                onPressed: () {
+                                  Get.to(() => RegisterScreen());
+                                },
+                                child: Text('register'.tr),
+                              ),
+                              MaterialButton(
+                                onPressed: () {
+                                  Get.to(() => ForgotPasswordScreen());
+                                },
+                                child: Text('forgot password'.tr),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 150),
+                      ],
                     ),
-                    MaterialButton(
-                      onPressed: () {},
-                      child: Text('forgot password'.tr),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
