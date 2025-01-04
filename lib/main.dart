@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:project_manager/bindings/auth_binding.dart';
 import 'package:project_manager/bindings/drawer_binding.dart';
+import 'package:project_manager/bindings/image_picker_binding.dart';
 import 'package:project_manager/bindings/language_binding.dart';
 import 'package:project_manager/bindings/theme_binding.dart';
 import 'package:project_manager/firebase_options.dart';
@@ -40,6 +41,9 @@ class MyApp extends StatelessWidget {
           bodyLarge: const TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
+          ),
+          bodySmall: const TextStyle(
+            color: Colors.black,
           ),
         ),
         cardTheme: const CardTheme().copyWith(
@@ -81,6 +85,10 @@ class MyApp extends StatelessWidget {
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
+          bodySmall: const TextStyle(
+            color: Colors.white,
+            // fontWeight: FontWeight.bold,
+          ),
         ),
         cardTheme: const CardTheme().copyWith(
           color: Colors.black54,
@@ -114,6 +122,7 @@ class MyApp extends StatelessWidget {
         AuthBinding().dependencies();
         DrawerBinding().dependencies();
         LanguageBinding().dependencies();
+        ImagePickerBinding().dependencies();
       }),
       home: const SplashScreen(),
       translations: AppTranslations(),

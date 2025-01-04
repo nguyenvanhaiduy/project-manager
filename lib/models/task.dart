@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:project_manager/models/project.dart';
-import 'package:project_manager/models/user.dart';
 import 'package:uuid/uuid.dart';
 
 class Task {
@@ -11,7 +10,8 @@ class Task {
   final DateTime startDate;
   final DateTime endDate;
   final Status status;
-  final User assignTo;
+  final Priority priority;
+  final String assignTo; // Lưu ID của User
 
   Task(
     this.id, {
@@ -20,6 +20,7 @@ class Task {
     required this.startDate,
     required this.endDate,
     required this.status,
+    required this.priority,
     required this.assignTo,
   });
 
@@ -32,7 +33,8 @@ class Task {
       endDate: (data['endDate'] as Timestamp).toDate(),
       status: Status.values.firstWhereOrNull((s) => s.name == data['status']) ??
           Status.notStarted,
-      assignTo: User.fromMap(data: data),
+      priority: data['priority'],
+      assignTo: data['assignTo'],
     );
   }
 
@@ -44,7 +46,7 @@ class Task {
       'startDate': Timestamp.fromDate(startDate),
       'endDate': Timestamp.fromDate(endDate),
       'status': status.name,
-      'assignTo': assignTo.toMap(),
+      'assignTo': assignTo,
     };
   }
 }

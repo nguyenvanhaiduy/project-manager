@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project_manager/controllers/drawer_controller.dart';
+import 'package:project_manager/controllers/auth/drawer_controller.dart';
 import 'package:project_manager/controllers/language_controller.dart';
 import 'package:project_manager/controllers/theme_controller.dart';
 import 'package:project_manager/views/widgets/drawer/header.dart';
@@ -11,13 +11,11 @@ import 'package:project_manager/views/widgets/drawer/tag_title.dart';
 import 'package:project_manager/views/widgets/drawer/theme_and_language.dart';
 
 class CustomDrawer extends StatelessWidget {
-  CustomDrawer({super.key, this.isLogout = true});
+  CustomDrawer({super.key});
 
   final DrawerrController drawerController = Get.find();
   final ThemeController themeController = Get.find();
   final LanguageController languageController = Get.find();
-
-  final bool isLogout;
 
   @override
   Widget build(BuildContext context) {
@@ -32,13 +30,13 @@ class CustomDrawer extends StatelessWidget {
                 const SizedBox(height: 10),
                 ProfileCard(),
                 const SizedBox(height: 10),
-                TagTile(isLogout: isLogout),
+                TagTile(),
                 const SizedBox(height: 10),
                 ThemeAndLanguageTile(),
                 const SizedBox(height: 10),
                 RateAndFeature(),
                 const SizedBox(height: 10),
-                LogoutTile(isLogout: isLogout),
+                LogoutTile(),
               ],
             ),
           ),

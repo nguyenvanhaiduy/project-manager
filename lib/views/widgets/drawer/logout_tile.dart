@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project_manager/controllers/auth_controller.dart';
-import 'package:project_manager/controllers/drawer_controller.dart';
+import 'package:project_manager/controllers/auth/auth_controller.dart';
+import 'package:project_manager/controllers/auth/drawer_controller.dart';
 import 'package:project_manager/views/widgets/widgets.dart';
 
 class LogoutTile extends StatelessWidget {
-  LogoutTile({super.key, required this.isLogout});
-
-  final bool isLogout;
+  LogoutTile({super.key});
 
   final DrawerrController drawerController = Get.find();
   final AuthController authController = Get.find();
@@ -26,15 +24,15 @@ class LogoutTile extends StatelessWidget {
       ),
       clipBehavior: Clip.hardEdge,
       child: Material(
-        child: isLogout
-            ? customListTile(
+        child: authController.isLogout.value
+            ? Container()
+            : customListTile(
                 'logout'.tr,
                 '6',
                 const Spacer(),
                 BorderRadius.circular(10),
                 () => _handleLogoutAction(),
-              )
-            : Container(),
+              ),
       ),
     );
   }

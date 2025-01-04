@@ -5,6 +5,7 @@ class User {
   final String id;
   final String name;
   final String job;
+  final String? phone;
   final String email;
   final String? imageUrl;
   final Color? color;
@@ -13,6 +14,7 @@ class User {
     required this.id,
     required this.name,
     required this.job,
+    this.phone,
     required this.email,
     this.imageUrl,
     this.color,
@@ -23,6 +25,7 @@ class User {
       id: data['id'],
       name: data['name'],
       job: data['job'],
+      phone: data['phone'] ?? '',
       email: data['email'],
       imageUrl: data['imageUrl'],
       color: data['color'] != null
@@ -40,6 +43,7 @@ class User {
       'id': const Uuid().v4(),
       'name': name,
       'job': job,
+      'phone': phone,
       'email': email,
       'imageUrl': imageUrl,
       'color': '#${color!.value.toRadixString(16).substring(2, 8)}',

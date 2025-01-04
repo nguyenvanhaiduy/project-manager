@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project_manager/controllers/drawer_controller.dart';
+import 'package:project_manager/controllers/auth/drawer_controller.dart';
 import 'package:project_manager/controllers/language_controller.dart';
 import 'package:project_manager/controllers/theme_controller.dart';
 import 'package:project_manager/views/widgets/widgets.dart';

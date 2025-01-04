@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project_manager/controllers/auth_controller.dart';
+import 'package:project_manager/controllers/auth/auth_controller.dart';
 import 'package:project_manager/controllers/theme_controller.dart';
 import 'package:project_manager/views/widgets/widgets.dart';
 
@@ -23,7 +23,9 @@ class ForgotPasswordScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
           child: SizedBox(
-            width: 400,
+            width: Get.size.width > 800
+                ? MediaQuery.of(context).size.width * 0.7
+                : null,
             child: Form(
               key: _formKey,
               child: Column(

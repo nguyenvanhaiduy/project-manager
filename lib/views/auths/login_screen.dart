@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project_manager/controllers/auth_controller.dart';
+import 'package:project_manager/controllers/auth/auth_controller.dart';
 import 'package:project_manager/controllers/theme_controller.dart';
 import 'package:project_manager/views/auths/forgot_password.dart';
 import 'package:project_manager/views/auths/register_screen.dart';
@@ -16,16 +16,16 @@ class LoginScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final themeController = Get.find<ThemeController>();
+  final ThemeController themeController = Get.find();
 
-  final emailRegex =
-      RegExp(r'^[{0-9}{a-z}{A-Z}.]+@[{0-9}{a-z}{A-Z}]+\.[{0-9}{a-z}{A-Z}]+$');
+  // final emailRegex =
+  //     RegExp(r'^[{0-9}{a-z}{A-Z}.]+@[{0-9}{a-z}{A-Z}]+\.[{0-9}{a-z}{A-Z}]+$');
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      drawer: CustomDrawer(isLogout: false),
+      drawer: CustomDrawer(),
       body: Center(
         child: Form(
           key: _formKey,
@@ -38,7 +38,9 @@ class LoginScreen extends StatelessWidget {
                 }),
                 const SizedBox(height: 50),
                 SizedBox(
-                  width: 400,
+                  width: Get.size.width > 800
+                      ? MediaQuery.of(context).size.width * 0.7
+                      : null,
                   child: Center(
                     child: Column(
                       children: [
@@ -52,7 +54,7 @@ class LoginScreen extends StatelessWidget {
                               return 'you must enter your email'.tr;
                             }
 
-                            if (!emailRegex.hasMatch(value)) {
+                            if (!GetUtils.isEmail(value)) {
                               return 'you must enter a valid email'.tr;
                             }
                             return null;
@@ -104,7 +106,9 @@ class LoginScreen extends StatelessWidget {
                             children: [
                               MaterialButton(
                                 onPressed: () {
-                                  Get.to(() => RegisterScreen());
+                                  Get.to(
+                                    () => RegisterScreen(),
+                                  );
                                 },
                                 child: Text('register'.tr),
                               ),

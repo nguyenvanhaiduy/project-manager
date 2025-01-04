@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:project_manager/controllers/auth_controller.dart';
-import 'package:project_manager/controllers/drawer_controller.dart';
+import 'package:project_manager/controllers/auth/auth_controller.dart';
+import 'package:project_manager/controllers/auth/drawer_controller.dart';
 import 'package:project_manager/controllers/language_controller.dart';
 import 'package:project_manager/controllers/theme_controller.dart';
 
@@ -66,6 +66,7 @@ Widget customTextField(
   bool? obscureText = false,
   IconData? suffixIcon,
   TextInputType keyboardType = TextInputType.text,
+  bool readOnly = false,
 }) {
   final AuthController authController = Get.find();
   return Container(
@@ -93,6 +94,7 @@ Widget customTextField(
           children: [
             Expanded(
               child: TextFormField(
+                readOnly: readOnly,
                 controller: textEditingController,
                 obscureText: obscureText ?? false,
                 keyboardType: keyboardType,

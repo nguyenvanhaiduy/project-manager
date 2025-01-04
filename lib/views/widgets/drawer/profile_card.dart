@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project_manager/controllers/auth_controller.dart';
+import 'package:project_manager/controllers/auth/auth_controller.dart';
+import 'package:project_manager/views/widgets/profile/profile_screen.dart';
 
 class ProfileCard extends StatelessWidget {
   ProfileCard({super.key});
@@ -10,8 +10,10 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: 'card',
+    return GestureDetector(
+      onTap: () {
+        authController.isLogout.value ? null : Get.to(() => ProfileScreen());
+      },
       child: AnimatedContainer(
         duration: const Duration(microseconds: 300),
         curve: Curves.linear,
@@ -31,35 +33,40 @@ class ProfileCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: _buildUserProfileAvatar(),
+              leading: Hero(
+                tag: 'card',
+                child: Obx(() => _buildUserProfileAvatar()),
+              ),
               title: Obx(
-                () => Text(authController.currentUser.value?.name ?? 'user'),
+                () => Text(authController.currentUser.value?.name ?? 'User'),
               ),
               subtitle: Obx(
-                () => Text(authController.currentUser.value?.job ?? 'job'),
+                () => Text(authController.currentUser.value?.job ?? 'Job'),
               ),
             ),
-            const Divider(
-              thickness: 0.5,
-              indent: 20,
-              endIndent: 20,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                TextButton.icon(
-                  onPressed: () {},
-                  label: Text('view'.tr),
-                  icon: const Icon(Icons.remove_red_eye),
-                ),
-                TextButton.icon(
-                  onPressed: () {},
-                  label: Text('edit'.tr),
-                  icon: const Icon(Icons.edit),
-                ),
-              ],
-            ),
-            kIsWeb ? const SizedBox(height: 8) : const SizedBox(),
+            // const Divider(
+            //   thickness: 0.5,
+            //   indent: 20,
+            //   endIndent: 20,
+            // ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+            //   children: [
+            //     TextButton.icon(
+            //       onPressed: () {},
+            //       label: Text('view'.tr),
+            //       icon: const Icon(Icons.remove_red_eye),
+            //     ),
+            //     TextButton.icon(
+            //       onPressed: () {
+            //         Get.to(() => ProfileScreen());
+            //       },
+            //       label: Text('edit'.tr),
+            //       icon: const Icon(Icons.edit),
+            //     ),
+            //   ],
+            // ),
+            // kIsWeb ? const SizedBox(height: 8) : const SizedBox(),
           ],
         ),
       ),

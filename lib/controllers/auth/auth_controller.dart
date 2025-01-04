@@ -9,7 +9,8 @@ import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:project_manager/controllers/resend_controller.dart';
+import 'package:project_manager/bindings/project_binding.dart';
+import 'package:project_manager/controllers/auth/resend_controller.dart';
 import 'package:project_manager/views/auths/verification_code.dart';
 import 'package:project_manager/models/user.dart';
 import 'package:project_manager/views/auths/login_screen.dart';
@@ -25,7 +26,10 @@ class AuthController extends GetxController {
   final String cloudinaryApiSecret = 'pGI2hf7-AP3QsM1gA_rOpQqiTHk';
 
   RxBool isShowPassword = true.obs;
+  RxBool isLogout = true.obs;
   Rx<User?> currentUser = Rx<User?>(null);
+
+  Rx<int> currentUserList = 3.obs;
 
   final ResendController resendController = Get.put(ResendController());
 
@@ -60,7 +64,8 @@ class AuthController extends GetxController {
       if (userDoc.exists) {
         final userData = userDoc.data();
         currentUser.value = User.fromMap(data: userData!);
-        Get.offAll(() => const ProjectScreen());
+        Get.offAll(() => ProjectScreen(), binding: ProjectBinding());
+        isLogout.value = false;
       }
     } else {
       Get.offAll(() => LoginScreen());
@@ -122,7 +127,8 @@ class AuthController extends GetxController {
         currentUser.value = User.fromMap(data: userDoc.data()!);
         Get.back();
         Get.snackbar('Success', 'Login Success', colorText: Colors.green);
-        Get.offAll(() => const ProjectScreen());
+        Get.offAll(() => ProjectScreen(), binding: ProjectBinding());
+        isLogout.value = false;
       }
     } on TimeoutException catch (e) {
       Get.back();
@@ -225,12 +231,67 @@ class AuthController extends GetxController {
       currentUser.value = newUser;
       await _firestore.collection('users').doc(user.uid).set(newUser.toMap());
       Get.back();
+      isLogout.value = false;
       Get.snackbar('Success', 'Login successful', colorText: Colors.green);
-      Get.offAll(() => const ProjectScreen());
+      Get.offAll(() => ProjectScreen(), binding: ProjectBinding());
     } on TimeoutException catch (e) {
       Get.back();
       Get.closeAllSnackbars();
       Get.snackbar('Error', e.toString(), colorText: Colors.red);
+    } catch (e) {
+      Get.back();
+      Get.closeAllSnackbars();
+      Get.snackbar('Error', e.toString(), colorText: Colors.red);
+    }
+  }
+
+  Future<void> updateUser(
+      {String? name,
+      String? job,
+      String? phone,
+      File? image,
+      Uint8List? imageWeb}) async {
+    try {
+      Get.dialog(
+        barrierDismissible: false,
+        const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+      String? imageUrl = await _uploadImage(image ?? imageWeb);
+      await _auth.currentUser?.updateDisplayName(name);
+      if (_auth.currentUser != null) {
+        final userId = _auth.currentUser!.uid;
+        await _firestore.collection('users').doc(userId).update({
+          'name': name,
+          'job': job,
+          'phone': phone,
+          'imageUrl': imageUrl ?? currentUser.value!.imageUrl,
+        });
+        currentUser.value = User(
+          id: userId,
+          name: name ?? currentUser.value!.name,
+          phone: phone ?? currentUser.value!.phone,
+          job: job ?? currentUser.value!.job,
+          email: currentUser.value!.email,
+          imageUrl: imageUrl ?? currentUser.value!.imageUrl,
+          color: currentUser.value!.color,
+        );
+        Get.back();
+        Get.closeAllSnackbars();
+        Get.snackbar('Success', 'Update information successfull',
+            colorText: Colors.green);
+      } else {
+        Get.back();
+        Get.closeAllSnackbars();
+
+        Get.snackbar('Error', 'Not found user', colorText: Colors.red);
+      }
+    } on auth.FirebaseAuthException catch (e) {
+      Get.back();
+      Get.closeAllSnackbars();
+      Get.snackbar('Error', e.message ?? 'An error has occurred',
+          colorText: Colors.red);
     } catch (e) {
       Get.back();
       Get.closeAllSnackbars();
@@ -249,6 +310,7 @@ class AuthController extends GetxController {
 
   Future<void> signOut() async {
     try {
+      isLogout.value = true;
       await _auth.signOut();
       Get.offAll(() => LoginScreen());
     } catch (e) {
