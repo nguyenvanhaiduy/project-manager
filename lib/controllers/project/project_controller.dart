@@ -40,12 +40,19 @@ class ProjectController extends GetxController {
 
   Future<void> addProject(Project project) async {
     try {
-      await _firestore
-          .collection('projects')
-          .doc(project.id)
-          .set(project.toMap());
+      Get.dialog(
+        barrierDismissible: false,
+        const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+      await _firestore.collection('projects').add(project.toMap());
+      Get.back();
+      Get.closeAllSnackbars();
       Get.snackbar('Success', 'Add project success', colorText: Colors.green);
     } catch (e) {
+      Get.back();
+      Get.closeAllSnackbars();
       Get.snackbar('Error', 'Failed to add project', colorText: Colors.red);
     }
   }
@@ -91,19 +98,20 @@ class ProjectController extends GetxController {
   }) async {
     try {
       if (userId != null) {
-        final doc = await _firestore.collection('users').doc(userId).get();
-        return User.fromMap(data: doc.data()!);
+        final doc = await _firestore
+            .collection('users')
+            .where('id', isEqualTo: userId)
+            .get();
+        return User.fromMap(data: doc.docs.first.data());
       } else if (email != null) {
         final doc = await _firestore
             .collection('users')
             .where('email', isEqualTo: email)
             .get();
         return User.fromMap(data: doc.docs.first.data());
-      } else {
-        Get.snackbar('Failed', 'Failed to get user', colorText: Colors.red);
       }
     } catch (e) {
-      Get.snackbar('Error', 'Error found', colorText: Colors.red);
+      print('Load user failed: $e');
     }
     return null;
   }

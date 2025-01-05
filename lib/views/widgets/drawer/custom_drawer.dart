@@ -3,12 +3,12 @@ import 'package:get/get.dart';
 import 'package:project_manager/controllers/auth/drawer_controller.dart';
 import 'package:project_manager/controllers/language_controller.dart';
 import 'package:project_manager/controllers/theme_controller.dart';
-import 'package:project_manager/views/widgets/drawer/header.dart';
-import 'package:project_manager/views/widgets/drawer/logout_tile.dart';
-import 'package:project_manager/views/widgets/drawer/profile_card.dart';
-import 'package:project_manager/views/widgets/drawer/rate_and_feature.dart';
-import 'package:project_manager/views/widgets/drawer/tag_title.dart';
-import 'package:project_manager/views/widgets/drawer/theme_and_language.dart';
+import 'package:project_manager/views/widgets/drawer/components/header.dart';
+import 'package:project_manager/views/widgets/drawer/components/logout_tile.dart';
+import 'package:project_manager/views/widgets/drawer/components/profile_card.dart';
+import 'package:project_manager/views/widgets/drawer/components/rate_and_feature.dart';
+import 'package:project_manager/views/widgets/drawer/components/tag_title.dart';
+import 'package:project_manager/views/widgets/drawer/components/theme_and_language.dart';
 
 class CustomDrawer extends StatelessWidget {
   CustomDrawer({super.key});

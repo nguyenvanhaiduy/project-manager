@@ -301,7 +301,7 @@ class AddProjectScreen extends StatelessWidget {
               const SizedBox(height: 15),
               Container(
                   height: 40,
-                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -331,7 +331,7 @@ class AddProjectScreen extends StatelessWidget {
                         ),
                         onPressed: () {
                           Get.defaultDialog(
-                            title: 'add user'.tr,
+                            title: 'add members'.tr,
                             content: Form(
                               key: _formKey1,
                               child: Column(
@@ -362,27 +362,28 @@ class AddProjectScreen extends StatelessWidget {
                                   const SizedBox(height: 10),
                                   TextButton(
                                     onPressed: () async {
-                                      final user1 =
-                                          assignedForArr.firstWhereOrNull(
-                                        (user1) =>
-                                            user1.email == emailController.text,
-                                      );
-                                      if (_formKey1.currentState!.validate() &&
-                                          user1 == null) {
+                                      if (_formKey1.currentState!.validate()) {
                                         final user =
                                             await projectController.getUser(
                                                 email: emailController.text);
                                         if (user != null) {
                                           assignedForArr.add(user);
                                           emailController.clear();
+                                          Get.back();
+                                        } else {
+                                          Get.snackbar(
+                                              'Error', 'Error not found',
+                                              colorText: Colors.red);
                                         }
-                                        Get.back();
                                       }
                                     },
                                     child: Text('add'.tr),
                                   ),
                                 ],
                               ),
+                              onPopInvoked: (didPop) {
+                                emailController.text = '';
+                              },
                             ),
                           );
                         },
@@ -428,22 +429,27 @@ class AddProjectScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: TextButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      // projectController.addProject(
-                      //   Project(
-                      //     title: titleController.text,
-                      //     description: descriptionController.text,
-                      //     status: Status.notStarted,
-                      //     priority: Priority.values[_selectedPriority.value],
-                      //     startDate: DateTime.now(),
-                      //     endDate: DateTime.now(),
-                      //     taskIds: [],
-                      //     userIds: [],
-                      //     owner: userOwner!.id,
-                      //   ),
-                      // );
-                      // Get.back();
+                      final List<String> userIds = [];
+                      for (var user in assignedForArr) {
+                        userIds.add(user.id);
+                      }
+                      await projectController.addProject(
+                        Project(
+                          title: titleController.text,
+                          description: descriptionController.text,
+                          status: Status.notStarted,
+                          priority: Priority.values[_selectedPriority.value],
+                          startDate: DateFormat('MM/dd/yyyy, hh:mm a')
+                              .parse(startDateController.text),
+                          endDate: DateFormat('MM/dd/yyyy, hh:mm a')
+                              .parse(dueDateController.text),
+                          taskIds: [],
+                          userIds: userIds,
+                          owner: userOwner!.id,
+                        ),
+                      );
                     }
                   },
                   style: TextButton.styleFrom(

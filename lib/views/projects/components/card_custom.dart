@@ -2,16 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:project_manager/controllers/auth/auth_controller.dart';
+import 'package:project_manager/controllers/project/project_controller.dart';
 import 'package:project_manager/models/project.dart';
+import 'package:project_manager/models/user.dart';
 
 class CardCustom extends StatelessWidget {
   CardCustom({super.key, required this.onTap, required this.project});
   final AuthController authController = Get.find();
+  final ProjectController projectController = Get.find();
   final Project project;
   final Function() onTap;
+  final RxList<User> assignedForArr = <User>[].obs;
+
+  Future<void> _fetchUsers() async {
+    await Future.wait(
+      project.userIds.map((userId) async {
+        final user = await projectController.getUser(userId: userId);
+        if (user != null) {
+          assignedForArr.add(user);
+        }
+      }),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    _fetchUsers();
     return InkWell(
       borderRadius: BorderRadius.circular(20),
       onTap: onTap,
@@ -64,7 +80,7 @@ class CardCustom extends StatelessWidget {
                   ),
                   alignment: Alignment.center,
                   child: Text(
-                    project.priority.name,
+                    project.priority.name.tr,
                     style: Theme.of(context)
                         .textTheme
                         .bodySmall!
@@ -81,7 +97,7 @@ class CardCustom extends StatelessWidget {
                   ),
                   alignment: Alignment.center,
                   child: Text(
-                    project.status.name,
+                    project.status.name.tr,
                     style: Theme.of(context)
                         .textTheme
                         .bodySmall!
@@ -107,99 +123,73 @@ class CardCustom extends StatelessWidget {
                     ),
                   ],
                 ),
-                Obx(() {
-                  // final users = authController.currentUserList;
-                  // final userCount = users.length;
-                  final userCount = authController.currentUserList;
-
-                  return SizedBox(
-                    height: 35,
-                    width: 100,
-                    child: Stack(
+                SizedBox(
+                  height: 35,
+                  width: 100,
+                  child: Obx(
+                    () => Stack(
+                      alignment:
+                          Alignment.centerRight, // Căn chỉnh Stack về bên phải
                       children: [
-                        if (userCount > 0)
+                        if (assignedForArr.length > 2)
                           Positioned(
-                            left: 0,
-                            child: CircleAvatar(
-                              radius: 16,
-                              backgroundColor: Colors.white,
-                              child: Obx(() {
-                                if (authController
-                                        .currentUser.value!.imageUrl !=
-                                    null) {
-                                  return CircleAvatar(
-                                    radius: 15,
-                                    backgroundImage: NetworkImage(authController
-                                        .currentUser.value!.imageUrl!),
-                                  );
-                                } else {
-                                  return CircleAvatar(
-                                    radius: 15,
-                                    backgroundColor:
-                                        authController.currentUser.value!.color,
-                                    child: Text(
-                                      authController.currentUser.value!.name[0]
-                                          .toUpperCase(),
-                                      // style: const TextStyle(fontSize: 40),
-                                    ),
-                                  );
-                                }
-                              }),
-                            ),
+                            right: assignedForArr.length > 1
+                                ? 24.0 * 2
+                                : 0, // Điều chỉnh vị trí dựa trên số lượng avatar
+                            child: _buildPlusAvatar(assignedForArr.length - 2),
                           ),
-                        if (userCount > 1)
+                        if (assignedForArr.length > 1)
                           Positioned(
-                            left:
-                                24, // Đẩy avatar thứ hai sang phải một chút để chồng lên avatar thứ nhất
-                            child: CircleAvatar(
-                              radius: 16,
-                              backgroundColor: Colors.white,
-                              child: Obx(() {
-                                if (authController
-                                        .currentUser.value!.imageUrl !=
-                                    null) {
-                                  return CircleAvatar(
-                                    radius: 15,
-                                    backgroundImage: NetworkImage(authController
-                                        .currentUser.value!.imageUrl!),
-                                  );
-                                } else {
-                                  return CircleAvatar(
-                                    radius: 15,
-                                    backgroundColor:
-                                        authController.currentUser.value!.color,
-                                    child: Text(
-                                      authController.currentUser.value!.name[0]
-                                          .toUpperCase(),
-                                      // style: const TextStyle(fontSize: 40),
-                                    ),
-                                  );
-                                }
-                              }),
-                            ),
+                            right:
+                                24.0, //  Đẩy avatar thứ hai sang trái một chút
+                            child: _buildAvatar(assignedForArr[1]),
                           ),
-                        if (userCount > 2)
+                        if (assignedForArr.isNotEmpty)
                           Positioned(
-                            left: 48, // Đẩy avatar "+" sang phải hơn nữa
-                            child: CircleAvatar(
-                              radius: 16,
-                              backgroundColor: Colors.grey,
-                              child: Center(
-                                child: Text(
-                                  '${userCount.value - 2}+', // Hiển thị số lượng người dùng chưa hiển thị
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ),
+                            right: 0,
+                            child: _buildAvatar(assignedForArr[0]),
                           ),
                       ],
                     ),
-                  );
-                }),
+                  ),
+                )
               ],
             ),
             const SizedBox(height: 10),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatar(User user) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0), // Khoảng cách giữa các avatar
+      child: CircleAvatar(
+        radius: 16,
+        backgroundColor: Colors.white,
+        child: user.imageUrl != null
+            ? CircleAvatar(
+                radius: 15,
+                backgroundImage: NetworkImage(user.imageUrl!),
+              )
+            : CircleAvatar(
+                radius: 15,
+                backgroundColor: user.color,
+                child: Text(user.name[0].toUpperCase()),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildPlusAvatar(int count) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0),
+      child: CircleAvatar(
+        radius: 16,
+        backgroundColor: Colors.grey,
+        child: Center(
+          child: Text('${count}+', style: const TextStyle(color: Colors.white)),
         ),
       ),
     );

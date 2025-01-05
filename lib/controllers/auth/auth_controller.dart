@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloudinary_sdk/cloudinary_sdk.dart';
 import 'package:email_otp/email_otp.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -29,8 +30,6 @@ class AuthController extends GetxController {
   RxBool isLogout = true.obs;
   Rx<User?> currentUser = Rx<User?>(null);
 
-  Rx<int> currentUserList = 3.obs;
-
   final ResendController resendController = Get.put(ResendController());
 
   bool get resendActive => resendController.isResendActive.value;
@@ -53,6 +52,15 @@ class AuthController extends GetxController {
       apiSecret: cloudinaryApiSecret,
       cloudName: cloudinaryCloudName,
     );
+
+    // FirebaseMessaging.instance.getToken().then((token) {
+    //   if (token != null) {
+    //     _firestore
+    //         .collection('users')
+    //         .doc(currentUser.value!.id)
+    //         .update({'fcmToken': token});
+    //   }
+    // });
 
     Future.delayed(const Duration(seconds: 1), () => checkIfUserIsLoggedIn());
   }

@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:project_manager/controllers/project/project_controller.dart';
 import 'package:project_manager/views/projects/add_project_screen.dart';
 import 'package:project_manager/views/projects/project_detail_screen.dart';
-import 'package:project_manager/views/projects/widgets/card_custom.dart';
+import 'package:project_manager/views/projects/components/card_custom.dart';
 import 'package:project_manager/views/widgets/drawer/custom_drawer.dart';
 
 class ProjectScreen extends StatelessWidget {
@@ -102,8 +102,7 @@ class ProjectScreen extends StatelessWidget {
                           crossAxisCount: 2,
                           crossAxisSpacing: 20,
                           mainAxisSpacing: 20,
-                          // childAspectRatio: 2,
-                          mainAxisExtent: kIsWeb ? 130 : 145,
+                          mainAxisExtent: kIsWeb ? 135 : 145,
                         ),
                         itemCount: projectController.projects.value.length,
                         itemBuilder: (context, index) {
