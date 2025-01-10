@@ -91,7 +91,10 @@ class ProjectScreen extends StatelessWidget {
                           return CardCustom(
                             project: projectController.projects.value[index],
                             onTap: () {
-                              Get.to(() => ProjectDetailScreen());
+                              Get.to(() => ProjectDetailScreen(
+                                    project:
+                                        projectController.projects.value[index],
+                                  ));
                             },
                           );
                         },
@@ -109,7 +112,12 @@ class ProjectScreen extends StatelessWidget {
                           return CardCustom(
                             project: projectController.projects.value[index],
                             onTap: () {
-                              Get.to(() => ProjectDetailScreen());
+                              Get.to(
+                                () => ProjectDetailScreen(
+                                  project:
+                                      projectController.projects.value[index],
+                                ),
+                              );
                             },
                           );
                         },

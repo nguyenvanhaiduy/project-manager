@@ -4,11 +4,12 @@ import 'package:get/get.dart';
 import 'package:project_manager/controllers/auth/auth_controller.dart';
 import 'package:project_manager/models/project.dart';
 import 'package:project_manager/models/user.dart';
+import 'package:project_manager/views/widgets/loading_overlay.dart';
 import 'package:rxdart/rxdart.dart' as rx;
 
 class ProjectController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final AuthController authController = Get.find();
+  final AuthController _authController = Get.find();
   Rx<List<Project>> projects = Rx<List<Project>>([]);
 
   @override
@@ -20,7 +21,7 @@ class ProjectController extends GetxController {
   Stream<List<Project>> fetchProjects() {
     return _firestore
         .collection('projects')
-        .where('owner', isEqualTo: authController.currentUser.value!.id)
+        .where('owner', isEqualTo: _authController.currentUser.value!.id)
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
@@ -30,7 +31,7 @@ class ProjectController extends GetxController {
         .mergeWith([
       _firestore
           .collection('projects')
-          .where('users', arrayContains: authController.currentUser.value!.id)
+          .where('users', arrayContains: _authController.currentUser.value!.id)
           .snapshots()
           .map((snapshot) => snapshot.docs
               .map((doc) => Project.fromMap(data: doc.data()))
@@ -40,26 +41,20 @@ class ProjectController extends GetxController {
 
   Future<void> addProject(Project project) async {
     try {
-      Get.dialog(
-        barrierDismissible: false,
-        const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      LoadingOverlay.show();
       await _firestore.collection('projects').add(project.toMap());
+      await LoadingOverlay.hide();
       Get.back();
-      Get.closeAllSnackbars();
       Get.snackbar('Success', 'Add project success', colorText: Colors.green);
     } catch (e) {
-      Get.back();
-      Get.closeAllSnackbars();
+      await LoadingOverlay.hide();
       Get.snackbar('Error', 'Failed to add project', colorText: Colors.red);
     }
   }
 
   Future<void> updateProject(Project project) async {
     try {
-      if (project.owner != authController.currentUser.value!.id) {
+      if (project.owner != _authController.currentUser.value!.id) {
         Get.snackbar('Error', 'You are not the owner of this project',
             colorText: Colors.red);
         return;
@@ -78,7 +73,7 @@ class ProjectController extends GetxController {
 
   Future<void> deleteProject(String projectId, String projectOwner) async {
     try {
-      if (projectOwner != authController.currentUser.value!.id) {
+      if (projectOwner != _authController.currentUser.value!.id) {
         Get.snackbar('Error', 'You are not the owner of this project',
             colorText: Colors.red);
         return;

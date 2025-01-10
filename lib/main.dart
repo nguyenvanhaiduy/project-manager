@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: kbackgroundLightColor,
         textTheme: const TextTheme().copyWith(
           bodyMedium: const TextStyle(
-            color: Colors.grey,
+            color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
           bodyLarge: const TextStyle(

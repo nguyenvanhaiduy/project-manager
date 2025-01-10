@@ -86,4 +86,5 @@ const Map<String, String> viVn = {
   'you must enter user email': 'Bạn phải nhập email người dùng',
   'please enter a valid email': 'Vui lòng nhập một email hợp lệ',
   'add members': 'Thêm thành viên',
+  'status': 'Trạng thái',
 };

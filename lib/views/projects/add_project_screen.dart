@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:project_manager/controllers/auth/auth_controller.dart';
+import 'package:project_manager/controllers/project/add_project_controller.dart';
 import 'package:project_manager/controllers/project/project_controller.dart';
 import 'package:project_manager/models/project.dart';
-import 'package:project_manager/models/user.dart';
 
+// ignore: must_be_immutable
 class AddProjectScreen extends StatelessWidget {
   AddProjectScreen({super.key});
 
-  final userOwner = Get.find<AuthController>().currentUser.value;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController startDateController =
@@ -20,20 +20,20 @@ class AddProjectScreen extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
 
   final ProjectController projectController = Get.find();
+  final AuthController authController = Get.find();
+  final AddProjectController addProjectController =
+      Get.put(AddProjectController());
 
   final _formKey = GlobalKey<FormState>();
   final _formKey1 = GlobalKey<FormState>();
-
-  final RxInt _selectedPriority = 0.obs;
-
-  void changePriority(int index) {
-    _selectedPriority.value = index;
-  }
+  var count = 0;
 
   @override
   Widget build(BuildContext context) {
-    final RxList<User> assignedForArr = [userOwner!].obs;
-
+    if (count == 0) {
+      addProjectController.addUser(authController.currentUser.value!);
+      count++;
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -306,22 +306,53 @@ class AddProjectScreen extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Expanded(
-                        // flex: 1,
                         child: Obx(() => ListView.builder(
                             scrollDirection: Axis.horizontal,
-                            itemCount: assignedForArr.length,
+                            itemCount:
+                                addProjectController.assignedForArr.length,
                             itemBuilder: (context, index) {
-                              final user = assignedForArr[index];
-                              if (user.imageUrl != null) {
-                                return CircleAvatar(
-                                  backgroundImage: NetworkImage(user.imageUrl!),
-                                );
-                              } else {
-                                return CircleAvatar(
-                                  backgroundColor: user.color,
-                                  child: Text(user.name[0].toUpperCase()),
-                                );
-                              }
+                              return Stack(
+                                children: [
+                                  addProjectController
+                                              .assignedForArr[index].imageUrl !=
+                                          null
+                                      ? Stack(
+                                          children: [
+                                            CircleAvatar(
+                                              backgroundImage: NetworkImage(
+                                                  addProjectController
+                                                      .assignedForArr[index]
+                                                      .imageUrl!),
+                                            ),
+                                          ],
+                                        )
+                                      : CircleAvatar(
+                                          backgroundColor: addProjectController
+                                              .assignedForArr[index].color,
+                                          child: Text(addProjectController
+                                              .assignedForArr[index].name[0]
+                                              .toUpperCase()),
+                                        ),
+                                  if (index != 0)
+                                    Positioned(
+                                      right: 0,
+                                      top: 0,
+                                      child: InkWell(
+                                        child: const CircleAvatar(
+                                          radius: 6,
+                                          backgroundImage: AssetImage(
+                                            'assets/icons/icons8-cancel-48.png',
+                                          ),
+                                          backgroundColor: Colors.grey,
+                                        ),
+                                        onTap: () {
+                                          addProjectController
+                                              .removeUser(index);
+                                        },
+                                      ),
+                                    ),
+                                ],
+                              );
                             })),
                       ),
                       IconButton.outlined(
@@ -329,60 +360,75 @@ class AddProjectScreen extends StatelessWidget {
                           backgroundColor:
                               Get.isDarkMode ? Colors.white10 : Colors.white,
                         ),
-                        onPressed: () {
-                          Get.defaultDialog(
+                        onPressed: () async {
+                          // Get.to(() => AddUserScreen());
+                          await Get.defaultDialog(
                             title: 'add members'.tr,
                             content: Form(
                               key: _formKey1,
-                              child: Column(
-                                children: [
-                                  TextFormField(
-                                    controller: emailController,
-                                    decoration: InputDecoration(
-                                      hintText: 'enter user email'.tr,
-                                    ),
-                                    validator: (value) {
-                                      final user1 =
-                                          assignedForArr.firstWhereOrNull(
-                                        (user1) =>
-                                            user1.email == emailController.text,
-                                      );
-                                      if (value == null || value.isEmpty) {
-                                        return 'you must enter user email'.tr;
-                                      }
-                                      if (user1 != null) {
-                                        return 'user already exists'.tr;
-                                      }
-                                      if (!GetUtils.isEmail(value)) {
-                                        return 'please enter a valid email'.tr;
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(height: 10),
-                                  TextButton(
-                                    onPressed: () async {
-                                      if (_formKey1.currentState!.validate()) {
-                                        final user =
-                                            await projectController.getUser(
-                                                email: emailController.text);
-                                        if (user != null) {
-                                          assignedForArr.add(user);
-                                          emailController.clear();
-                                          Get.back();
-                                        } else {
-                                          Get.snackbar(
-                                              'Error', 'Error not found',
-                                              colorText: Colors.red);
+                              child: SingleChildScrollView(
+                                keyboardDismissBehavior:
+                                    ScrollViewKeyboardDismissBehavior.onDrag,
+                                child: Column(
+                                  children: [
+                                    TextFormField(
+                                      controller: emailController,
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10)),
+                                        hintText: 'enter user email'.tr,
+                                      ),
+                                      validator: (value) {
+                                        final user = addProjectController
+                                            .assignedForArr
+                                            .firstWhereOrNull(
+                                          (user) =>
+                                              user.email ==
+                                              emailController.text,
+                                        );
+                                        if (value == null || value.isEmpty) {
+                                          return 'you must enter user email'.tr;
                                         }
-                                      }
-                                    },
-                                    child: Text('add'.tr),
-                                  ),
-                                ],
+                                        if (user != null) {
+                                          return 'user already exists'.tr;
+                                        }
+                                        if (!GetUtils.isEmail(value)) {
+                                          return 'please enter a valid email'
+                                              .tr;
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    const SizedBox(height: 10),
+                                    TextButton(
+                                      onPressed: () async {
+                                        if (_formKey1.currentState!
+                                            .validate()) {
+                                          final user =
+                                              await projectController.getUser(
+                                                  email: emailController.text);
+                                          if (user != null) {
+                                            emailController.clear();
+                                            Get.back();
+                                            addProjectController.addUser(user);
+                                            Get.snackbar('Successful',
+                                                '${user.name} added to project',
+                                                colorText: Colors.green);
+                                          } else {
+                                            Get.snackbar('Error',
+                                                'This account does not exist',
+                                                colorText: Colors.red);
+                                          }
+                                        }
+                                      },
+                                      child: Text('add'.tr),
+                                    ),
+                                  ],
+                                ),
                               ),
                               onPopInvoked: (didPop) {
-                                emailController.text = '';
+                                emailController.clear();
                               },
                             ),
                           );
@@ -412,15 +458,15 @@ class AddProjectScreen extends StatelessWidget {
                   children: [
                     const SizedBox(width: 20),
                     _customLablePriority(context, Priority.low, () {
-                      changePriority(0);
+                      addProjectController.changePriority(0);
                     }),
                     const SizedBox(width: 20),
                     _customLablePriority(context, Priority.medium, () {
-                      changePriority(1);
+                      addProjectController.changePriority(1);
                     }),
                     const SizedBox(width: 20),
                     _customLablePriority(context, Priority.high, () {
-                      changePriority(2);
+                      addProjectController.changePriority(2);
                     }),
                   ],
                 ),
@@ -432,7 +478,7 @@ class AddProjectScreen extends StatelessWidget {
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       final List<String> userIds = [];
-                      for (var user in assignedForArr) {
+                      for (var user in addProjectController.assignedForArr) {
                         userIds.add(user.id);
                       }
                       await projectController.addProject(
@@ -440,14 +486,15 @@ class AddProjectScreen extends StatelessWidget {
                           title: titleController.text,
                           description: descriptionController.text,
                           status: Status.notStarted,
-                          priority: Priority.values[_selectedPriority.value],
+                          priority: Priority.values[
+                              addProjectController.selectedPriority.value],
                           startDate: DateFormat('MM/dd/yyyy, hh:mm a')
                               .parse(startDateController.text),
                           endDate: DateFormat('MM/dd/yyyy, hh:mm a')
                               .parse(dueDateController.text),
                           taskIds: [],
                           userIds: userIds,
-                          owner: userOwner!.id,
+                          owner: authController.currentUser.value!.id,
                         ),
                       );
                     }
@@ -467,14 +514,12 @@ class AddProjectScreen extends StatelessWidget {
                       maxWidth: 300,
                     ),
                     height: kIsWeb ? 50 : 40,
-                    // decoration: BoxDecoration(
-                    //   color: Colors.white10,
-                    //   borderRadius: BorderRadius.circular(10),
-                    // ),
                     alignment: Alignment.center,
-                    child: Text('create project'.tr,
-                        style: Get.textTheme.bodyLarge!.copyWith(
-                            fontWeight: FontWeight.bold, fontSize: 18)),
+                    child: Text(
+                      'create project'.tr,
+                      style: Get.textTheme.bodyLarge!
+                          .copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
                   ),
                 ),
               )
@@ -545,7 +590,7 @@ class AddProjectScreen extends StatelessWidget {
           height: 40,
           decoration: BoxDecoration(
             border: Border.all(color: Colors.black, width: 1),
-            color: _selectedPriority.value == priority.index
+            color: addProjectController.selectedPriority.value == priority.index
                 ? getPriorityColor(priority)
                 : null,
             borderRadius: BorderRadius.circular(15),
@@ -556,7 +601,8 @@ class AddProjectScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.bodySmall!.copyWith(
                   fontWeight: FontWeight.w400,
                   fontSize: 15,
-                  color: _selectedPriority.value == priority.index
+                  color: addProjectController.selectedPriority.value ==
+                          priority.index
                       ? Colors.black
                       : null,
                 ),

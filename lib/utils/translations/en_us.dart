@@ -90,4 +90,5 @@ const Map<String, String> enUs = {
   'you must enter user email': 'You must enter user email',
   'please enter a valid email': 'Please enter a valid email',
   'add members': 'Add members',
+  'status': 'Status',
 };

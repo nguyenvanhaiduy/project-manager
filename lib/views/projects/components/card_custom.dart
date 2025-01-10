@@ -5,6 +5,8 @@ import 'package:project_manager/controllers/auth/auth_controller.dart';
 import 'package:project_manager/controllers/project/project_controller.dart';
 import 'package:project_manager/models/project.dart';
 import 'package:project_manager/models/user.dart';
+import 'package:project_manager/views/projects/components/build_avatar.dart';
+import 'package:project_manager/views/projects/components/build_plus_avatar.dart';
 
 class CardCustom extends StatelessWidget {
   CardCustom({super.key, required this.onTap, required this.project});
@@ -115,7 +117,8 @@ class CardCustom extends StatelessWidget {
                     const Icon(Icons.calendar_month),
                     const SizedBox(width: 10),
                     Text(
-                      DateFormat.yMMMd().format(project.startDate),
+                      DateFormat('MM/dd/yyyy, hh:mm a')
+                          .format(project.startDate),
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall!
@@ -125,71 +128,48 @@ class CardCustom extends StatelessWidget {
                 ),
                 SizedBox(
                   height: 35,
-                  width: 100,
-                  child: Obx(
-                    () => Stack(
-                      alignment:
-                          Alignment.centerRight, // Căn chỉnh Stack về bên phải
-                      children: [
-                        if (assignedForArr.length > 2)
-                          Positioned(
-                            right: assignedForArr.length > 1
-                                ? 24.0 * 2
-                                : 0, // Điều chỉnh vị trí dựa trên số lượng avatar
-                            child: _buildPlusAvatar(assignedForArr.length - 2),
-                          ),
-                        if (assignedForArr.length > 1)
-                          Positioned(
-                            right:
-                                24.0, //  Đẩy avatar thứ hai sang trái một chút
-                            child: _buildAvatar(assignedForArr[1]),
-                          ),
-                        if (assignedForArr.isNotEmpty)
-                          Positioned(
-                            right: 0,
-                            child: _buildAvatar(assignedForArr[0]),
-                          ),
-                      ],
-                    ),
+                  width: project.userIds.length == 1
+                      ? (30 * project.userIds.length.toDouble()) + 10
+                      : project.userIds.length > 2
+                          ? (30 * project.userIds.length.toDouble()) - 2
+                          : (30 * project.userIds.length.toDouble()) + 4,
+                  child: Stack(
+                    children: [
+                      for (int i = 0; i < project.userIds.length; i++)
+                        StreamBuilder<User?>(
+                            stream: Stream.fromFuture(projectController.getUser(
+                                userId: project.userIds[i])),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const SizedBox(
+                                  height: 10,
+                                  width: 10,
+                                  child: CircularProgressIndicator(),
+                                );
+                              } else if (!snapshot.hasData) {
+                                return const Icon(Icons.person);
+                              } else {
+                                return i > 1
+                                    ? Positioned(
+                                        left: 24.0 * i,
+                                        child: BuildPlusAvatar(
+                                          count: project.userIds.length - 2,
+                                        ))
+                                    : Positioned(
+                                        left: 24.0 * i,
+                                        child: BuildAvatar(
+                                          user: snapshot.data!,
+                                        ));
+                              }
+                            })
+                    ],
                   ),
-                )
+                ),
               ],
             ),
             const SizedBox(height: 10),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAvatar(User user) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0), // Khoảng cách giữa các avatar
-      child: CircleAvatar(
-        radius: 16,
-        backgroundColor: Colors.white,
-        child: user.imageUrl != null
-            ? CircleAvatar(
-                radius: 15,
-                backgroundImage: NetworkImage(user.imageUrl!),
-              )
-            : CircleAvatar(
-                radius: 15,
-                backgroundColor: user.color,
-                child: Text(user.name[0].toUpperCase()),
-              ),
-      ),
-    );
-  }
-
-  Widget _buildPlusAvatar(int count) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0),
-      child: CircleAvatar(
-        radius: 16,
-        backgroundColor: Colors.grey,
-        child: Center(
-          child: Text('${count}+', style: const TextStyle(color: Colors.white)),
         ),
       ),
     );

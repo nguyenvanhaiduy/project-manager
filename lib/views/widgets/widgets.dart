@@ -87,7 +87,7 @@ Widget customTextField(
           ),
           child: Text(
             name.tr,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyLarge,
           ),
         ),
         Row(
