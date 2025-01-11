@@ -63,6 +63,7 @@ Widget customTextField(
   IconData icon,
   String? Function(String?) onValid,
   ThemeController themeController, {
+  Function()? onTap,
   bool? obscureText = false,
   IconData? suffixIcon,
   TextInputType keyboardType = TextInputType.text,
@@ -98,6 +99,7 @@ Widget customTextField(
                 controller: textEditingController,
                 obscureText: obscureText ?? false,
                 keyboardType: keyboardType,
+                onTap: onTap,
                 style: TextStyle(
                     color: Theme.of(Get.context!).brightness == Brightness.light
                         ? Colors.black

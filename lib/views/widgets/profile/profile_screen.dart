@@ -20,6 +20,8 @@ class ProfileScreen extends StatelessWidget {
     final jobController = TextEditingController(text: user.job);
     final phoneController = TextEditingController(text: user.phone);
     final emailController = TextEditingController(text: user.email);
+    final originalImage = _imagePickerController.image.value;
+    final originalWebImage = _imagePickerController.webImage.value;
 
     return Scaffold(
       appBar: AppBar(
@@ -119,13 +121,25 @@ class ProfileScreen extends StatelessWidget {
                   height: 50,
                   child: OutlinedButton(
                     onPressed: () async {
-                      await _authController.updateUser(
-                        name: nameController.text,
-                        job: jobController.text,
-                        phone: phoneController.text,
-                        image: _imagePickerController.image.value,
-                        imageWeb: _imagePickerController.webImage.value,
-                      );
+                      bool hasChanges = _authController
+                                  .currentUser.value!.name !=
+                              nameController.text.trim() ||
+                          _authController.currentUser.value!.job !=
+                              jobController.text.trim() ||
+                          _authController.currentUser.value!.phone !=
+                              phoneController.text.trim() ||
+                          originalImage != _imagePickerController.image.value ||
+                          originalWebImage !=
+                              _imagePickerController.webImage.value;
+                      if (hasChanges) {
+                        await _authController.updateUser(
+                          name: nameController.text,
+                          job: jobController.text,
+                          phone: phoneController.text,
+                          image: _imagePickerController.image.value,
+                          imageWeb: _imagePickerController.webImage.value,
+                        );
+                      }
                     },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,

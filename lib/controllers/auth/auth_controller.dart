@@ -16,6 +16,7 @@ import 'package:project_manager/views/auths/verification_code.dart';
 import 'package:project_manager/models/user.dart';
 import 'package:project_manager/views/auths/login_screen.dart';
 import 'package:project_manager/views/projects/project_screen.dart';
+import 'package:project_manager/views/widgets/loading_overlay.dart';
 
 class AuthController extends GetxController {
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
@@ -260,12 +261,7 @@ class AuthController extends GetxController {
       File? image,
       Uint8List? imageWeb}) async {
     try {
-      Get.dialog(
-        barrierDismissible: false,
-        const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      LoadingOverlay.show();
       String? imageUrl = await _uploadImage(image ?? imageWeb);
       await _auth.currentUser?.updateDisplayName(name);
       if (_auth.currentUser != null) {
@@ -285,23 +281,23 @@ class AuthController extends GetxController {
           imageUrl: imageUrl ?? currentUser.value!.imageUrl,
           color: currentUser.value!.color,
         );
-        Get.back();
+        await LoadingOverlay.hide();
         Get.closeAllSnackbars();
         Get.snackbar('Success', 'Update information successfull',
             colorText: Colors.green);
       } else {
-        Get.back();
+        await LoadingOverlay.hide();
         Get.closeAllSnackbars();
 
         Get.snackbar('Error', 'Not found user', colorText: Colors.red);
       }
     } on auth.FirebaseAuthException catch (e) {
-      Get.back();
+      await LoadingOverlay.hide();
       Get.closeAllSnackbars();
       Get.snackbar('Error', e.message ?? 'An error has occurred',
           colorText: Colors.red);
     } catch (e) {
-      Get.back();
+      await LoadingOverlay.hide();
       Get.closeAllSnackbars();
       Get.snackbar('Error', e.toString(), colorText: Colors.red);
     }

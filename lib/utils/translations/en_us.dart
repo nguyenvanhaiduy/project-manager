@@ -7,6 +7,9 @@ const Map<String, String> enUs = {
   'new_task': 'New Task',
   'edit_task': 'Edit Task',
   'delete_task': 'Delete Task',
+
+  'name': 'Name',
+  'description': 'Descrition',
   // 'task_status': 'Task Status',
   // 'not_started': 'Not Started',
   // 'in_progress': 'In Progress',
@@ -81,6 +84,7 @@ const Map<String, String> enUs = {
       'You must enter your project start date',
   'you must enter your project due date':
       'You must enter your project due date',
+  'due date must be after start date': 'Due date must be after start date',
   'assigned for': 'Assigned for',
   'priority': 'Priority',
   'low': 'Low',

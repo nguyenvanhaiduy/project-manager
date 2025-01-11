@@ -117,8 +117,7 @@ class CardCustom extends StatelessWidget {
                     const Icon(Icons.calendar_month),
                     const SizedBox(width: 10),
                     Text(
-                      DateFormat('MM/dd/yyyy, hh:mm a')
-                          .format(project.startDate),
+                      DateFormat('MM/dd/yyyy, HH:mm').format(project.startDate),
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall!
@@ -143,10 +142,10 @@ class CardCustom extends StatelessWidget {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
                                 return const SizedBox(
-                                  height: 10,
-                                  width: 10,
-                                  child: CircularProgressIndicator(),
-                                );
+                                    // height: 10,
+                                    // width: 10,
+                                    // child: CircularProgressIndicator(),
+                                    );
                               } else if (!snapshot.hasData) {
                                 return const Icon(Icons.person);
                               } else {
@@ -160,6 +159,7 @@ class CardCustom extends StatelessWidget {
                                         left: 24.0 * i,
                                         child: BuildAvatar(
                                           user: snapshot.data!,
+                                          size: 16,
                                         ));
                               }
                             })

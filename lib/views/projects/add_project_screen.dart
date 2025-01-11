@@ -13,10 +13,8 @@ class AddProjectScreen extends StatelessWidget {
 
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController startDateController =
-      TextEditingController(text: 'start date'.tr);
-  final TextEditingController dueDateController =
-      TextEditingController(text: 'due date'.tr);
+  final TextEditingController startDateController = TextEditingController();
+  final TextEditingController dueDateController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
 
   final ProjectController projectController = Get.find();
@@ -118,7 +116,7 @@ class AddProjectScreen extends StatelessWidget {
                                 pickedTime?.minute ?? DateTime.now().minute,
                               );
                               startDateController.text =
-                                  DateFormat('MM/dd/yyyy, hh:mm a')
+                                  DateFormat('MM/dd/yyyy, HH:mm')
                                       .format(pickedDateTime);
                             }
                           },
@@ -156,7 +154,7 @@ class AddProjectScreen extends StatelessWidget {
                                   pickedTime?.hour ?? DateTime.now().hour,
                                   pickedTime?.minute ?? DateTime.now().minute);
                               dueDateController.text =
-                                  DateFormat('MM/dd/yyyy, hh:mm a')
+                                  DateFormat('MM/dd/yyyy, HH:mm')
                                       .format(pickedDateTime);
                             }
                           },
@@ -167,9 +165,9 @@ class AddProjectScreen extends StatelessWidget {
                               return 'you must enter your project due date'.tr;
                             }
                             if (startDateController.text.isNotEmpty &&
-                                DateFormat('MM/dd/yyyy, hh:mm a')
+                                DateFormat('MM/dd/yyyy, HH:mm')
                                     .parse(value)
-                                    .isBefore(DateFormat('MM/dd/yyyy, hh:mm a')
+                                    .isBefore(DateFormat('MM/dd/yyyy, HH:mm')
                                         .parse(startDateController.text))) {
                               return 'due date must be after start date'.tr;
                             }
@@ -186,6 +184,7 @@ class AddProjectScreen extends StatelessWidget {
                           title: 'Start Date',
                           color: Colors.yellow[700]!,
                           controller: startDateController,
+                          hintText: 'start date'.tr,
                           onTap: () async {
                             DateTime? pickedDate = await showDatePicker(
                               context: context,
@@ -207,7 +206,7 @@ class AddProjectScreen extends StatelessWidget {
                                 pickedTime?.minute ?? DateTime.now().minute,
                               );
                               startDateController.text =
-                                  DateFormat('MM/dd/yyyy, hh:mm a')
+                                  DateFormat('MM/dd/yyyy, HH:mm')
                                       .format(pickedDateTime);
                             }
                           },
@@ -228,6 +227,7 @@ class AddProjectScreen extends StatelessWidget {
                           title: 'Due Date',
                           color: Colors.yellow[700]!,
                           controller: dueDateController,
+                          hintText: 'due date'.tr,
                           onTap: () async {
                             DateTime? pickedDate = await showDatePicker(
                               context: context,
@@ -246,7 +246,7 @@ class AddProjectScreen extends StatelessWidget {
                                   pickedTime?.hour ?? DateTime.now().hour,
                                   pickedTime?.minute ?? DateTime.now().minute);
                               dueDateController.text =
-                                  DateFormat('MM/dd/yyyy, hh:mm a')
+                                  DateFormat('MM/dd/yyyy, HH:mm')
                                       .format(pickedDateTime);
                             }
                           },
@@ -257,9 +257,9 @@ class AddProjectScreen extends StatelessWidget {
                               return 'you must enter your project due date'.tr;
                             }
                             if (startDateController.text.isNotEmpty &&
-                                DateFormat('MM/dd/yyyy, hh:mm a')
+                                DateFormat('MM/dd/yyyy, HH:mm')
                                     .parse(value)
-                                    .isBefore(DateFormat('MM/dd/yyyy, hh:mm a')
+                                    .isBefore(DateFormat('MM/dd/yyyy, HH:mm')
                                         .parse(startDateController.text))) {
                               return 'due date must be after start date'.tr;
                             }
@@ -488,9 +488,9 @@ class AddProjectScreen extends StatelessWidget {
                           status: Status.notStarted,
                           priority: Priority.values[
                               addProjectController.selectedPriority.value],
-                          startDate: DateFormat('MM/dd/yyyy, hh:mm a')
+                          startDate: DateFormat('MM/dd/yyyy, HH:mm')
                               .parse(startDateController.text),
-                          endDate: DateFormat('MM/dd/yyyy, hh:mm a')
+                          endDate: DateFormat('MM/dd/yyyy, HH:mm')
                               .parse(dueDateController.text),
                           taskIds: [],
                           userIds: userIds,
@@ -534,6 +534,7 @@ class AddProjectScreen extends StatelessWidget {
       {required IconData icon,
       required String title,
       required Color color,
+      String? hintText,
       TextEditingController? controller,
       Function()? onTap,
       String? Function(String?)? onValidator,
@@ -562,9 +563,8 @@ class AddProjectScreen extends StatelessWidget {
                   child: TextFormField(
                     readOnly: true,
                     controller: controller,
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                    ),
+                    decoration: InputDecoration(
+                        border: InputBorder.none, hintText: hintText),
                     onTap: onTap,
                     validator: onValidator,
                   ),
