@@ -90,4 +90,10 @@ const Map<String, String> viVn = {
   'please enter a valid email': 'Vui lòng nhập một email hợp lệ',
   'add members': 'Thêm thành viên',
   'status': 'Trạng thái',
+  'project completion progress!': 'Tiến độ hoàn thành dự án!',
+  'yes': 'Có',
+  'no': 'Không',
+  'delete users': 'Xoá người dùng',
+  'are you sure you want to delete': 'Bạn có chắc chắn muốn xoá ',
+  'out of the project?': ' ra khỏi dự án?',
 };

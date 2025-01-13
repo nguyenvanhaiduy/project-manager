@@ -4,12 +4,13 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloudinary_sdk/cloudinary_sdk.dart';
-import 'package:email_otp/email_otp.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
-// import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server/gmail.dart';
 import 'package:project_manager/bindings/project_binding.dart';
 import 'package:project_manager/controllers/auth/resend_controller.dart';
 import 'package:project_manager/views/auths/verification_code.dart';
@@ -30,6 +31,7 @@ class AuthController extends GetxController {
   RxBool isShowPassword = true.obs;
   RxBool isLogout = true.obs;
   Rx<User?> currentUser = Rx<User?>(null);
+  String? currentOtp;
 
   final ResendController resendController = Get.put(ResendController());
 
@@ -40,13 +42,13 @@ class AuthController extends GetxController {
   void onInit() {
     super.onInit();
 
-    EmailOTP.config(
-      appName: 'Project Manager',
-      otpType: OTPType.numeric,
-      otpLength: 5,
-      emailTheme: EmailTheme.v3,
-      expiry: 60000,
-    );
+    // EmailOTP.config(
+    //   appName: 'Project Manager',
+    //   otpType: OTPType.numeric,
+    //   otpLength: 5,
+    //   emailTheme: EmailTheme.v4,
+    //   expiry: 60000,
+    // );
 
     _cloudinary = Cloudinary.full(
       apiKey: cloudinaryApiKey,
@@ -68,6 +70,8 @@ class AuthController extends GetxController {
 
   void checkIfUserIsLoggedIn() async {
     final user = _auth.currentUser;
+    print('user: $user');
+
     if (user != null) {
       final userDoc = await _firestore.collection('users').doc(user.uid).get();
       if (userDoc.exists) {
@@ -80,6 +84,19 @@ class AuthController extends GetxController {
       Get.offAll(() => LoginScreen());
     }
   }
+
+  // ignore: slash_for_doc_comments
+  /**
+   * flutter: user: User(displayName: duy nguyen, email: haiduy2k3@gmail.com, 
+   * isEmailVerified: false, isAnonymous: false, 
+   * metadata: UserMetadata(creationTime: 2025-01-13 09:20:15.016Z,
+   * lastSignInTime: 2025-01-13 09:20:15.016Z), phoneNumber: null, 
+   * photoURL: null, providerData, 
+   * [UserInfo(displayName: duy nguyen, email: haiduy2k3@gmail.com, phoneNumber: null, photoURL: null, 
+   * providerId: password, uid: haiduy2k3@gmail.com)], 
+   * refreshToken: AMf-vBxAs6QqRnEYJds_-F-pK7XH6jMwdSlcgBCDPiWULfzHdgC_mur3lIVHBStkeUlDvb-luhDXk2GbwHft97Q9eJfFKH90kPowppRBCHLU3EqWdfXjqNsv4gmAIN4vHFNU58CNYZavxF-wTxawGaUPIH2amvtbV5TIRCU4buW--N-2LvfI7FdklMq6OIm6DZ9qFXGVAWo-mvSQWtRrv8WRpH7elN84F7KiMRz9UB-KxfSEuiGTVx4, tenantId: null, uid: w1bmSDwNSZTT0XttoYblejyv5JE3)
+
+   */
 
   Future<String?> _uploadImage(dynamic imageFile) async {
     if (imageFile == null) {
@@ -112,12 +129,7 @@ class AuthController extends GetxController {
 
   Future<void> signInWithEmailAndPassword(String email, String password) async {
     try {
-      Get.dialog(
-        barrierDismissible: false,
-        const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      LoadingOverlay.show();
       final credentialUser = await _auth
           .signInWithEmailAndPassword(email: email, password: password)
           .timeout(
@@ -134,17 +146,17 @@ class AuthController extends GetxController {
           .get();
       if (userDoc.exists) {
         currentUser.value = User.fromMap(data: userDoc.data()!);
-        Get.back();
+        LoadingOverlay.hide();
         Get.snackbar('Success', 'Login Success', colorText: Colors.green);
         Get.offAll(() => ProjectScreen(), binding: ProjectBinding());
         isLogout.value = false;
       }
     } on TimeoutException catch (e) {
-      Get.back();
+      LoadingOverlay.hide();
       Get.closeAllSnackbars();
       Get.snackbar('Error', e.toString(), colorText: Colors.red);
     } catch (e) {
-      Get.back();
+      LoadingOverlay.hide();
       Get.closeAllSnackbars();
       Get.snackbar('Error', e.toString(), colorText: Colors.red);
     }
@@ -152,12 +164,7 @@ class AuthController extends GetxController {
 
   void goToVerificationScreen(String name, String job, File? image,
       Uint8List? webImage, String email, String password) async {
-    Get.dialog(
-      barrierDismissible: false,
-      const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
+    LoadingOverlay.show();
 
     try {
       final querySnapShot = await _firestore
@@ -166,8 +173,8 @@ class AuthController extends GetxController {
           .limit(1)
           .get();
       if (querySnapShot.docs.isEmpty) {
-        if (await EmailOTP.sendOTP(email: email)) {
-          Get.back();
+        if (await sendOTP(email)) {
+          LoadingOverlay.hide();
           Get.to(() => VerificationCode(
                 email: email,
                 name: name,
@@ -178,11 +185,11 @@ class AuthController extends GetxController {
               ));
           resendController.startTimer();
         } else {
-          Get.back();
+          LoadingOverlay.hide();
         }
       } else {
         Get.closeAllSnackbars();
-        Get.back();
+        LoadingOverlay.hide();
         Get.snackbar(
           'Error',
           'Email address already in use',
@@ -191,7 +198,7 @@ class AuthController extends GetxController {
       }
     } catch (e) {
       Get.closeAllSnackbars();
-      Get.back();
+      LoadingOverlay.hide();
       Get.snackbar(
         'Error',
         e.toString(),
@@ -202,20 +209,93 @@ class AuthController extends GetxController {
 
   void resendCode(String email) async {
     if (!resendController.isResendActive.value) return;
-    await EmailOTP.sendOTP(email: email);
+    await sendOTP(email);
     resendController.resetTimer();
     resendController.startTimer();
+  }
+
+  Future<bool> sendOTP(String email) async {
+    final otp = generateOTP();
+    currentOtp = otp;
+    final smtpServer = gmail('testmode2k3@gmail.com', 'bfvs wrdw vzoe lczo');
+    final message = Message()
+      ..from = const Address('testmode2k3@gmail.com', 'Duy Nguyễn')
+      ..recipients.add(email)
+      ..subject = 'Mã OTP xác thực tài khoản'
+      ..html = '''
+    <!DOCTYPE html>
+    <html lang="vi">
+      <head>
+        <meta charset="UTF-8">
+        <title>Mã OTP của bạn</title>
+        <style>
+          body {
+            font-family: sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+          }
+          .container {
+            width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          }
+          h1 {
+            color: #007bff; /* Blue color */
+          }
+          .otp-code {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            text-align: center; 
+          }
+          .expiry {
+            font-size: 12px;
+            color: #6c757d; /* Gray color */
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>Xin chào,</h1>
+          <p>Mã OTP của bạn để xác thực tài khoản là:</p>
+          <div class="otp-code">$otp</div>
+          <p class="expiry">Mã này sẽ hết hạn sau 2 phút.</p>
+          <p>Nếu bạn không yêu cầu mã này, vui lòng bỏ qua email này.</p>
+        </div>
+      </body>
+    </html>
+  ''';
+    try {
+      final sendReport = await send(message, smtpServer);
+      if (kDebugMode) {
+        print('OTP sent: $sendReport');
+      }
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error sending OTP: $e');
+      }
+      Get.snackbar('Error', e.toString(), colorText: Colors.red);
+      return false;
+    }
+  }
+
+  String generateOTP() {
+    final random = Random();
+    return (10000 + random.nextInt(90000)).toString();
   }
 
   Future<void> signUpWithEmailAndPassword(String name, String job, File? image,
       Uint8List? webImage, String email, String password) async {
     try {
-      Get.dialog(
-        barrierDismissible: false,
-        const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      LoadingOverlay.show();
       final credentialUser = await _auth
           .createUserWithEmailAndPassword(email: email, password: password)
           .timeout(
@@ -239,16 +319,16 @@ class AuthController extends GetxController {
       );
       currentUser.value = newUser;
       await _firestore.collection('users').doc(user.uid).set(newUser.toMap());
-      Get.back();
+      LoadingOverlay.hide();
       isLogout.value = false;
       Get.snackbar('Success', 'Login successful', colorText: Colors.green);
       Get.offAll(() => ProjectScreen(), binding: ProjectBinding());
     } on TimeoutException catch (e) {
-      Get.back();
+      LoadingOverlay.hide();
       Get.closeAllSnackbars();
       Get.snackbar('Error', e.toString(), colorText: Colors.red);
     } catch (e) {
-      Get.back();
+      LoadingOverlay.hide();
       Get.closeAllSnackbars();
       Get.snackbar('Error', e.toString(), colorText: Colors.red);
     }

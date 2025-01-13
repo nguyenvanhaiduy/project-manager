@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 
 class ResendController extends GetxController {
   final RxBool isResendActive = false.obs;
-  final RxInt time = 60.obs;
+  final RxInt time = 120.obs;
 
   void startTimer() {
     Future.delayed(const Duration(seconds: 1), () {
@@ -17,6 +17,6 @@ class ResendController extends GetxController {
 
   void resetTimer() {
     isResendActive.value = false;
-    time.value = 60;
+    time.value = 120;
   }
 }

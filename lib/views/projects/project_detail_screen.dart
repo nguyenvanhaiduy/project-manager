@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -21,11 +25,91 @@ class ProjectDetailScreen extends StatelessWidget {
   final GlobalKey _buttonPriorityKey = GlobalKey();
   final _formKey = GlobalKey<FormState>();
   final ProjectController projectController = Get.find();
-  final RxList<User?> listUsers = <User>[].obs;
+  final RxList<String> listUsers = <String>[].obs;
 
   final progressProjectController = Get.put(
     ProgressProjectController(targetValue: 0.2),
   );
+
+  Future<void> confirmDeleteUser(String name, String id) async {
+    await Get.dialog(
+      barrierDismissible: true,
+      Center(
+        child: Container(
+          width: 300,
+          clipBehavior: Clip.hardEdge,
+          height: 150,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Get.isDarkMode ? Colors.white12 : Colors.white,
+          ),
+          child: Material(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'delete users'.tr,
+                  style: Get.textTheme.bodyLarge!
+                      .copyWith(fontWeight: FontWeight.bold),
+                ),
+                Expanded(
+                    child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          text: 'are you sure you want to delete'.tr,
+                          style: Get.textTheme.bodyLarge,
+                          children: [
+                            TextSpan(
+                                text: name,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold)),
+                            TextSpan(text: 'out of the project?'.tr),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(),
+                            onPressed: () {
+                              Get.back();
+                            },
+                            child: Text(
+                              'no'.tr,
+                              // style: TextStyle(color: Colors.grey[600]),
+                            ),
+                          ),
+                          OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                                // backgroundColor: Colors.white,
+                                ),
+                            onPressed: () {
+                              print(listUsers.length);
+
+                              listUsers.remove(id);
+                              Get.back();
+                              print(listUsers.length);
+                            },
+                            child: Text('yes'.tr),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                ))
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +125,7 @@ class ProjectDetailScreen extends StatelessWidget {
 
     RxInt selectStatusIndex = project.status.index.obs;
     RxInt selectPriorityIndex = project.priority.index.obs;
+    listUsers.value = project.userIds.obs;
 
     void changeStatusIndex(int value) {
       selectStatusIndex.value = value;
@@ -251,36 +336,51 @@ class ProjectDetailScreen extends StatelessWidget {
                     SizedBox(
                       height: 35,
                       width: 100,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        alignment: Alignment.centerRight,
-                        children: [
-                          for (int i = 0; i < project.userIds.length; i++)
-                            StreamBuilder<User?>(
-                              stream: Stream.fromFuture(projectController
-                                  .getUser(userId: project.userIds[i])),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Container();
-                                } else if (snapshot.hasError) {
-                                  return const Icon(Icons.error);
-                                } else if (!snapshot.hasData ||
-                                    snapshot.data == null) {
-                                  return const Icon(Icons.person);
-                                } else {
-                                  return Positioned(
-                                    right: i *
-                                        24.0, // Điều chỉnh khoảng cách giữa các avatar
-                                    child: BuildAvatar(
-                                      user: snapshot.data!,
-                                      size: 17.5,
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
-                        ],
+                      child: Obx(
+                        () => Stack(
+                          fit: StackFit.expand,
+                          alignment: Alignment.centerRight,
+                          children: [
+                            for (int i = 0; i < listUsers.length; i++)
+                              StreamBuilder<User?>(
+                                stream: Stream.fromFuture(projectController
+                                    .getUser(userId: listUsers[i])),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return Container();
+                                  } else if (snapshot.hasError) {
+                                    return const Icon(Icons.error);
+                                  } else if (!snapshot.hasData ||
+                                      snapshot.data == null) {
+                                    return SizedBox();
+                                  } else {
+                                    return Positioned(
+                                      right: i *
+                                          24.0, // Điều chỉnh khoảng cách giữa các avatar
+                                      child: GestureDetector(
+                                        onTap: () async {
+                                          if (isOwner) {
+                                            if (snapshot.data!.id !=
+                                                project.owner) {
+                                              await confirmDeleteUser(
+                                                snapshot.data!.name,
+                                                snapshot.data!.id,
+                                              );
+                                            }
+                                          }
+                                        },
+                                        child: BuildAvatar(
+                                          user: snapshot.data!,
+                                          size: 17.5,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                          ],
+                        ),
                       ),
                     )
                   ],
@@ -354,7 +454,6 @@ class ProjectDetailScreen extends StatelessWidget {
               const SizedBox(height: 15),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
-                height: 140,
                 decoration: BoxDecoration(
                   color: Get.isDarkMode ? Colors.white10 : Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -373,9 +472,11 @@ class ProjectDetailScreen extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(right: 0),
                             child: SizedBox(
-                              // width: 180,
+                              width: kIsWeb
+                                  ? 170
+                                  : (Platform.isAndroid ? 200 : 180),
                               child: Text(
-                                'Tiến độ hoàn thành dự án!',
+                                'project completion progress!'.tr,
                                 style: Get.textTheme.bodyLarge,
                               ),
                             ),
@@ -437,11 +538,26 @@ class ProjectDetailScreen extends StatelessWidget {
                   ? OutlinedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          print('test');
+                          projectController.updateProject(
+                            Project(
+                              id: project.id,
+                              title: titleController.text.trim(),
+                              description: descriptionController.text.trim(),
+                              status: Status.values[selectStatusIndex.value],
+                              priority:
+                                  Priority.values[selectPriorityIndex.value],
+                              startDate: DateFormat('MM/dd/yyyy, HH:mm')
+                                  .parse(startDateController.text),
+                              endDate: DateFormat('MM/dd/yyyy, HH:mm')
+                                  .parse(dueDateController.text),
+                              taskIds: project.taskIds,
+                              userIds: listUsers,
+                              owner: project.owner,
+                            ),
+                          );
                         }
                       },
                       style: OutlinedButton.styleFrom(
-                        // backgroundColor: Get.is,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 50, vertical: 10),
                       ),

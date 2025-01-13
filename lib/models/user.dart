@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
+// import 'package:uuid/uuid.dart';
 
 class User {
   final String id;
@@ -40,7 +40,7 @@ class User {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': const Uuid().v4(),
+      'id': id,
       'name': name,
       'job': job,
       'phone': phone,

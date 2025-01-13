@@ -36,11 +36,9 @@ class MyApp extends StatelessWidget {
         textTheme: const TextTheme().copyWith(
           bodyMedium: const TextStyle(
             color: Colors.black,
-            fontWeight: FontWeight.bold,
           ),
           bodyLarge: const TextStyle(
             color: Colors.black,
-            fontWeight: FontWeight.bold,
           ),
           bodySmall: const TextStyle(
             color: Colors.black,
@@ -79,11 +77,11 @@ class MyApp extends StatelessWidget {
         textTheme: const TextTheme().copyWith(
           bodyMedium: const TextStyle(
             color: Colors.white,
-            fontWeight: FontWeight.bold,
+            // fontWeight: FontWeight.bold,
           ),
           bodyLarge: const TextStyle(
             color: Colors.white,
-            fontWeight: FontWeight.bold,
+            // fontWeight: FontWeight.bold,
           ),
           bodySmall: const TextStyle(
             color: Colors.white,

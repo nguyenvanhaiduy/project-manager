@@ -6,6 +6,7 @@ import 'package:project_manager/controllers/auth/auth_controller.dart';
 import 'package:project_manager/controllers/project/add_project_controller.dart';
 import 'package:project_manager/controllers/project/project_controller.dart';
 import 'package:project_manager/models/project.dart';
+import 'package:uuid/uuid.dart';
 
 // ignore: must_be_immutable
 class AddProjectScreen extends StatelessWidget {
@@ -151,8 +152,8 @@ class AddProjectScreen extends StatelessWidget {
                                   pickedDate.year,
                                   pickedDate.month,
                                   pickedDate.day,
-                                  pickedTime?.hour ?? DateTime.now().hour,
-                                  pickedTime?.minute ?? DateTime.now().minute);
+                                  pickedTime?.hour ?? TimeOfDay.now().hour,
+                                  pickedTime?.minute ?? TimeOfDay.now().minute);
                               dueDateController.text =
                                   DateFormat('MM/dd/yyyy, HH:mm')
                                       .format(pickedDateTime);
@@ -198,16 +199,18 @@ class AddProjectScreen extends StatelessWidget {
                                 initialTime: TimeOfDay.now(),
                               );
 
-                              DateTime pickedDateTime = DateTime(
-                                pickedDate.year,
-                                pickedDate.month,
-                                pickedDate.day,
-                                pickedTime?.hour ?? DateTime.now().hour,
-                                pickedTime?.minute ?? DateTime.now().minute,
-                              );
-                              startDateController.text =
-                                  DateFormat('MM/dd/yyyy, HH:mm')
-                                      .format(pickedDateTime);
+                              if (pickedTime != null) {
+                                DateTime pickedDateTime = DateTime(
+                                  pickedDate.year,
+                                  pickedDate.month,
+                                  pickedDate.day,
+                                  pickedTime.hour,
+                                  pickedTime.minute,
+                                );
+                                startDateController.text =
+                                    DateFormat('MM/dd/yyyy, HH:mm')
+                                        .format(pickedDateTime);
+                              }
                             }
                           },
                           onValidator: (value) {
@@ -239,15 +242,18 @@ class AddProjectScreen extends StatelessWidget {
                               TimeOfDay? pickedTime = await showTimePicker(
                                   context: context,
                                   initialTime: TimeOfDay.now());
-                              DateTime pickedDateTime = DateTime(
+                              if (pickedTime != null) {
+                                DateTime pickedDateTime = DateTime(
                                   pickedDate.year,
                                   pickedDate.month,
                                   pickedDate.day,
-                                  pickedTime?.hour ?? DateTime.now().hour,
-                                  pickedTime?.minute ?? DateTime.now().minute);
-                              dueDateController.text =
-                                  DateFormat('MM/dd/yyyy, HH:mm')
-                                      .format(pickedDateTime);
+                                  pickedTime.hour,
+                                  pickedTime.minute,
+                                );
+                                dueDateController.text =
+                                    DateFormat('MM/dd/yyyy, HH:mm')
+                                        .format(pickedDateTime);
+                              }
                             }
                           },
                           onValidator: (value) {
@@ -478,11 +484,12 @@ class AddProjectScreen extends StatelessWidget {
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       final List<String> userIds = [];
-                      for (var user in addProjectController.assignedForArr) {
+                      for (final user in addProjectController.assignedForArr) {
                         userIds.add(user.id);
                       }
                       await projectController.addProject(
                         Project(
+                          id: const Uuid().v4(),
                           title: titleController.text,
                           description: descriptionController.text,
                           status: Status.notStarted,

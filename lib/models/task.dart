@@ -13,8 +13,8 @@ class Task {
   final Priority priority;
   final String assignTo; // Lưu ID của User
 
-  Task(
-    this.id, {
+  Task({
+    String? id,
     required this.title,
     required this.description,
     required this.startDate,
@@ -22,11 +22,11 @@ class Task {
     required this.status,
     required this.priority,
     required this.assignTo,
-  });
+  }) : id = id ?? const Uuid().v4();
 
   factory Task.fromMap({required Map<String, dynamic> data}) {
     return Task(
-      data['id'],
+      id: data['id'],
       title: data['title'],
       description: data['description'],
       startDate: (data['startDate'] as Timestamp).toDate(),
@@ -40,7 +40,7 @@ class Task {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': const Uuid().v4(),
+      'id': id,
       'title': title,
       'description': description,
       'startDate': Timestamp.fromDate(startDate),

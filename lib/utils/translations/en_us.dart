@@ -95,4 +95,10 @@ const Map<String, String> enUs = {
   'please enter a valid email': 'Please enter a valid email',
   'add members': 'Add members',
   'status': 'Status',
+  'project completion progress!': 'Project completion progress!',
+  'yes': 'Yes',
+  'no': 'No',
+  'delete users': 'Delete users',
+  'are you sure you want to delete': 'Are you sure you want to delete ',
+  'out of the project?': ' out of the project?',
 };

@@ -5,7 +5,6 @@ import 'package:project_manager/controllers/auth/auth_controller.dart';
 import 'package:project_manager/models/project.dart';
 import 'package:project_manager/models/user.dart';
 import 'package:project_manager/views/widgets/loading_overlay.dart';
-import 'package:rxdart/rxdart.dart' as rx;
 
 class ProjectController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -18,42 +17,61 @@ class ProjectController extends GetxController {
     projects.bindStream(fetchProjects());
   }
 
+  // Stream<List<Project>> fetchProjects() {
+  //   return _firestore
+  //       .collection('projects')
+  //       .where('owner', isEqualTo: _authController.currentUser.value!.id)
+  //       .snapshots()
+  //       .map(
+  //         (snapshot) => snapshot.docs
+  //             .map((doc) => Project.fromMap(data: doc.data()))
+  //             .toList(),
+  //       )
+  //       .mergeWith([
+  //     _firestore
+  //         .collection('projects')
+  //         .where('users', arrayContains: _authController.currentUser.value!.id)
+  //         .snapshots()
+  //         .map((snapshot) => snapshot.docs
+  //             .map((doc) => Project.fromMap(data: doc.data()))
+  //             .toList())
+  //   ]).map((list) => list.toSet().toList());
+  // }
+
   Stream<List<Project>> fetchProjects() {
-    return _firestore
+    Stream<List<Project>> test = _firestore
         .collection('projects')
-        .where('owner', isEqualTo: _authController.currentUser.value!.id)
+        .where('users', arrayContains: _authController.currentUser.value!.id)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Project.fromMap(data: doc.data()))
-              .toList(),
-        )
-        .mergeWith([
-      _firestore
-          .collection('projects')
-          .where('users', arrayContains: _authController.currentUser.value!.id)
-          .snapshots()
-          .map((snapshot) => snapshot.docs
-              .map((doc) => Project.fromMap(data: doc.data()))
-              .toList())
-    ]).map((list) => list.toSet().toList());
+        .map((snapshot) => snapshot.docs
+            .map((doc) => Project.fromMap(data: doc.data()))
+            .toList());
+    print('maximum: ${test.length}');
+    return test;
   }
 
   Future<void> addProject(Project project) async {
     try {
       LoadingOverlay.show();
-      await _firestore.collection('projects').add(project.toMap());
+      await _firestore
+          .collection('projects')
+          .doc(project.id)
+          .set(project.toMap());
       await LoadingOverlay.hide();
       Get.back();
       Get.snackbar('Success', 'Add project success', colorText: Colors.green);
     } catch (e) {
       await LoadingOverlay.hide();
+      Get.closeAllSnackbars();
+      print('Error: $e');
       Get.snackbar('Error', 'Failed to add project', colorText: Colors.red);
     }
   }
 
   Future<void> updateProject(Project project) async {
     try {
+      print('project: ${project.id}');
+      print('${project.owner} equal ${_authController.currentUser.value!.id}');
       if (project.owner != _authController.currentUser.value!.id) {
         Get.snackbar('Error', 'You are not the owner of this project',
             colorText: Colors.red);
@@ -67,6 +85,8 @@ class ProjectController extends GetxController {
             colorText: Colors.green);
       }
     } catch (e) {
+      Get.closeAllSnackbars();
+      print('Failed to update project: $e');
       Get.snackbar('Error', 'Failed to update project', colorText: Colors.red);
     }
   }

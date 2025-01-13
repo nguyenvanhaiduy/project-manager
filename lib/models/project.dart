@@ -16,7 +16,7 @@ class Project {
   final String owner; // Lưu ID của người tạo Project
 
   Project({
-    this.id = '',
+    String? id,
     required this.title,
     required this.description,
     required this.status,
@@ -26,7 +26,7 @@ class Project {
     required this.taskIds,
     required this.userIds,
     required this.owner,
-  });
+  }) : id = id ?? const Uuid().v4();
 
   factory Project.fromMap({required Map<String, dynamic> data}) {
     return Project(
@@ -48,7 +48,7 @@ class Project {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': const Uuid().v4(),
+      'id': id,
       'title': title,
       'description': description,
       'status': status.name,

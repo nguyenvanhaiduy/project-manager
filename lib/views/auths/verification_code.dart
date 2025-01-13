@@ -1,10 +1,11 @@
 import 'dart:io';
 
-import 'package:email_otp/email_otp.dart';
+// import 'package:email_otp/email_otp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:project_manager/controllers/auth/auth_controller.dart';
+import 'package:project_manager/controllers/auth/resend_controller.dart';
 import 'package:project_manager/views/widgets/widgets.dart';
 
 class VerificationCode extends StatelessWidget {
@@ -19,6 +20,7 @@ class VerificationCode extends StatelessWidget {
   });
 
   final AuthController authController = Get.find();
+  final ResendController resendController = Get.put(ResendController());
 
   final List<TextEditingController> _controllers =
       List.generate(5, (index) => TextEditingController());
@@ -68,16 +70,19 @@ class VerificationCode extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              Obx(
-                () => Row(
+              Obx(() {
+                if (resendController.isResendActive.value) {
+                  authController.currentOtp = '';
+                }
+                return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Text(
                       'Resend code affter ${authController.time ~/ 60}:${authController.time % 60}',
                     ),
                   ],
-                ),
-              ),
+                );
+              }),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -90,7 +95,7 @@ class VerificationCode extends StatelessWidget {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      if (EmailOTP.verifyOTP(otp: code)) {
+                      if (code == authController.currentOtp) {
                         authController.signUpWithEmailAndPassword(
                           name,
                           job,
