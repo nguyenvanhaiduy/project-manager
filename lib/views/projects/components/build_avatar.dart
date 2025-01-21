@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_manager/models/user.dart';
+import 'package:project_manager/utils/color_utils.dart';
 
 class BuildAvatar extends StatelessWidget {
   const BuildAvatar({super.key, required this.user, required this.size});
@@ -21,7 +22,10 @@ class BuildAvatar extends StatelessWidget {
             : CircleAvatar(
                 radius: size - 1,
                 backgroundColor: user.color,
-                child: Text(user.name[0].toUpperCase()),
+                foregroundColor: getContrastingTextColor(user.color!),
+                child: Text(
+                  user.name[0].toUpperCase(),
+                ),
               ),
       ),
     );

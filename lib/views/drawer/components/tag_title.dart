@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_manager/controllers/auth/auth_controller.dart';
 import 'package:project_manager/controllers/auth/drawer_controller.dart';
-import 'package:project_manager/views/widgets/tag/tag_screen.dart';
+// import 'package:project_manager/views/widgets/tag/tag_screen.dart';
 import 'package:project_manager/views/widgets/widgets.dart';
 
 class TagTile extends StatelessWidget {
@@ -14,7 +14,7 @@ class TagTile extends StatelessWidget {
   void _handleTagAction() {
     drawerController.changeIndex('1');
     // Get.back();
-    Get.to(() => TagScreen());
+    // Get.to(() => TagScreen());
     // Get.defaultDialog(onCancel: () => Get.back(), onConfirm: () => Get.back());
   }
 

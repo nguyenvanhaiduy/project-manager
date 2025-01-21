@@ -44,12 +44,17 @@ Widget customListTile(String title, String id, Widget leading,
   return Obx(
     () => ListTile(
       key: Key(id),
-      title: Text(title),
+      title: Text(
+        title,
+        style: Get.textTheme.bodyLarge!.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
       onTap: onPressed,
       selected: drawerController.selectedIndex.value == id,
-      shape: RoundedRectangleBorder(
-        borderRadius: borderRadiusGeometry,
-      ),
+      // shape: RoundedRectangleBorder(
+      //   borderRadius: BorderRadius.circular(0),
+      // ),
       leading: leading,
       trailing: trailing,
     ),
@@ -88,7 +93,10 @@ Widget customTextField(
           ),
           child: Text(
             name.tr,
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge!
+                .copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         Row(

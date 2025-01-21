@@ -12,8 +12,12 @@ class LoadingOverlay {
   }
 
   static Future<void> hide() async {
-    if (Get.isDialogOpen ?? false) {
-      Get.back();
+    try {
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      }
+    } catch (e) {
+      print('Error hiding loading overlay: $e');
     }
   }
 }

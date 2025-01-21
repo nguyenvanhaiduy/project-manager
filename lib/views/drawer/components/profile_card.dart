@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_manager/controllers/auth/auth_controller.dart';
-import 'package:project_manager/views/widgets/profile/profile_screen.dart';
+import 'package:project_manager/utils/color_utils.dart';
+import 'package:project_manager/views/profile/profile_screen.dart';
 
 class ProfileCard extends StatelessWidget {
   ProfileCard({super.key});
@@ -23,7 +24,7 @@ class ProfileCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              offset: const Offset(0, 5),
+              offset: const Offset(0, 0),
               blurRadius: 10,
               color: Colors.black.withOpacity(0.1),
             ),
@@ -38,7 +39,12 @@ class ProfileCard extends StatelessWidget {
                 child: Obx(() => _buildUserProfileAvatar()),
               ),
               title: Obx(
-                () => Text(authController.currentUser.value?.name ?? 'User'),
+                () => Text(
+                  authController.currentUser.value?.name ?? 'User',
+                  style: Get.textTheme.bodyLarge!.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
               subtitle: Obx(
                 () => Text(authController.currentUser.value?.job ?? 'Job'),
@@ -74,10 +80,10 @@ class ProfileCard extends StatelessWidget {
   }
 
   Widget _buildUserProfileAvatar() {
-    print(
-        'authController.currentUser.value?.imageUrl ${authController.currentUser.value?.imageUrl}');
-    print(
-        'authController.currentUser.value?.color ${authController.currentUser.value?.color}');
+    // print(
+    //     'authController.currentUser.value?.imageUrl ${authController.currentUser.value?.imageUrl}');
+    // print(
+    //     'authController.currentUser.value?.color ${authController.currentUser.value?.color}');
     if (authController.currentUser.value?.imageUrl != null) {
       return CircleAvatar(
         minRadius: 20,
@@ -92,6 +98,8 @@ class ProfileCard extends StatelessWidget {
         minRadius: 20,
         maxRadius: 30,
         backgroundColor: authController.currentUser.value!.color,
+        foregroundColor:
+            getContrastingTextColor(authController.currentUser.value!.color!),
         child: Text(
           authController.currentUser.value!.name[0].toUpperCase(),
         ),

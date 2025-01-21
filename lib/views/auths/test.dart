@@ -975,3 +975,57 @@
 //     1,
 //   );
 // }
+// SizedBox(
+                //   height: 40,
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.center,
+                //     children: [
+                //       Spacer(
+                //         flex: kIsWeb ? 2 : 1,
+                //       ),
+                //       Expanded(
+                //         flex: 10,
+                //         child: Container(
+                //           // color: Colors.purple,
+                //           child: ListView(
+                //             shrinkWrap: true,
+                //             padding: const EdgeInsets.symmetric(horizontal: 0),
+                //             scrollDirection: Axis.horizontal,
+                //             children: [
+                //               _customLable(context, label: 'all'.tr, ontap: () {}),
+                //               SizedBox(
+                //                 width: sizeWidth,
+                //               ),
+                //               _customLable(context,
+                //                   label: 'not start'.tr, ontap: () {}),
+                //               SizedBox(
+                //                 width: sizeWidth,
+                //               ),
+                //               _customLable(context,
+                //                   label: 'in progress'.tr, ontap: () {}),
+                //               SizedBox(
+                //                 width: sizeWidth,
+                //               ),
+                //               _customLable(context,
+                //                   label: 'completed'.tr, ontap: () {}),
+                //               SizedBox(
+                //                 width: sizeWidth,
+                //               ),
+                //               _customLable(context,
+                //                   label: 'late completed'.tr, ontap: () {}),
+                //               SizedBox(
+                //                 width: sizeWidth,
+                //               ),
+                //               _customLable(context,
+                //                   label: 'unfinished'.tr, ontap: () {}),
+                //             ],
+                //           ),
+                //         ),
+                //       ),
+                //       Spacer(
+                //         flex: 1,
+                //       ),
+                //     ],
+                //   ),
+                // ),
+                // const SizedBox(height: 10),

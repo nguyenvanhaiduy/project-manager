@@ -93,7 +93,17 @@ const Map<String, String> viVn = {
   'project completion progress!': 'Tiến độ hoàn thành dự án!',
   'yes': 'Có',
   'no': 'Không',
-  'delete users': 'Xoá người dùng',
+  'confirm delete': 'Xác nhận xoá',
   'are you sure you want to delete': 'Bạn có chắc chắn muốn xoá ',
   'out of the project?': ' ra khỏi dự án?',
+  'no project yet': 'Bạn chưa có dự án nào', 'delete': 'Xoá',
+  'cancel': 'Huỷ',
+  'are you sure want to delete this project?':
+      'Bạn có chắc chắn muốn xóa dự án này?',
+  'view details': 'Xem chi tiết',
+  'no task yet': 'Bạn chưa có nhiệm vụ nào!!!',
+  'project detail': 'Chi tiết dự án',
+  'your task': 'Nhiệm vụ của bạn',
+  'task detail': 'Chi tiết nhiệm vụ',
+  'create task': 'Tạo nhiệm vụ',
 };

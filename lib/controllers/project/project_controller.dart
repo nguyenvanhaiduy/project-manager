@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_manager/controllers/auth/auth_controller.dart';
@@ -9,7 +10,8 @@ import 'package:project_manager/views/widgets/loading_overlay.dart';
 class ProjectController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AuthController _authController = Get.find();
-  Rx<List<Project>> projects = Rx<List<Project>>([]);
+  RxList<Project> projects = <Project>[].obs;
+  RxString currentSort = 'date'.obs; // Mặc định sắp xếp theo date
 
   @override
   void onInit() {
@@ -17,40 +19,45 @@ class ProjectController extends GetxController {
     projects.bindStream(fetchProjects());
   }
 
-  // Stream<List<Project>> fetchProjects() {
-  //   return _firestore
-  //       .collection('projects')
-  //       .where('owner', isEqualTo: _authController.currentUser.value!.id)
-  //       .snapshots()
-  //       .map(
-  //         (snapshot) => snapshot.docs
-  //             .map((doc) => Project.fromMap(data: doc.data()))
-  //             .toList(),
-  //       )
-  //       .mergeWith([
-  //     _firestore
-  //         .collection('projects')
-  //         .where('users', arrayContains: _authController.currentUser.value!.id)
-  //         .snapshots()
-  //         .map((snapshot) => snapshot.docs
-  //             .map((doc) => Project.fromMap(data: doc.data()))
-  //             .toList())
-  //   ]).map((list) => list.toSet().toList());
-  // }
+  void sortProjects() {
+    if (currentSort.value == 'status') {
+      projects.sort((a, b) => a.status.index.compareTo(b.status.index));
+    } else if (currentSort.value == 'priority') {
+      projects.sort((a, b) => a.priority.index.compareTo(b.priority.index));
+    } else {
+      projects.sort((a, b) => b.startDate.compareTo(a.startDate));
+    }
+  }
+
+  void changeSort(String newSort) {
+    currentSort.value = newSort;
+    sortProjects();
+  }
 
   Stream<List<Project>> fetchProjects() {
-    Stream<List<Project>> test = _firestore
+    return _firestore
         .collection('projects')
         .where('users', arrayContains: _authController.currentUser.value!.id)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => Project.fromMap(data: doc.data()))
-            .toList());
-    print('maximum: ${test.length}');
-    return test;
+        .map((snapshot) {
+      final List<Project> projects = snapshot.docs
+          .map((doc) => Project.fromMap(data: doc.data()))
+          .toList();
+
+      if (currentSort.value == 'status') {
+        projects.sort((a, b) => a.status.index.compareTo(b.status.index));
+      } else if (currentSort.value == 'priority') {
+        projects.sort((a, b) => a.priority.index.compareTo(b.priority.index));
+      } else {
+        projects.sort((a, b) => b.startDate.compareTo(a.startDate));
+      }
+
+      return projects;
+    });
   }
 
   Future<void> addProject(Project project) async {
+    Get.closeAllSnackbars();
     try {
       LoadingOverlay.show();
       await _firestore
@@ -62,48 +69,52 @@ class ProjectController extends GetxController {
       Get.snackbar('Success', 'Add project success', colorText: Colors.green);
     } catch (e) {
       await LoadingOverlay.hide();
-      Get.closeAllSnackbars();
-      print('Error: $e');
+      if (kDebugMode) print('Error: $e');
+
       Get.snackbar('Error', 'Failed to add project', colorText: Colors.red);
     }
   }
 
   Future<void> updateProject(Project project) async {
+    Get.closeAllSnackbars();
     try {
-      print('project: ${project.id}');
-      print('${project.owner} equal ${_authController.currentUser.value!.id}');
-      if (project.owner != _authController.currentUser.value!.id) {
-        Get.snackbar('Error', 'You are not the owner of this project',
-            colorText: Colors.red);
-        return;
-      } else {
-        await _firestore
-            .collection('projects')
-            .doc(project.id)
-            .update(project.toMap());
-        Get.snackbar('Success', 'Update project success',
-            colorText: Colors.green);
-      }
+      LoadingOverlay.show();
+      await _firestore
+          .collection('projects')
+          .doc(project.id)
+          .update(project.toMap());
+      await LoadingOverlay.hide();
+      Get.snackbar('Success', 'Update project success',
+          colorText: Colors.green);
     } catch (e) {
-      Get.closeAllSnackbars();
-      print('Failed to update project: $e');
+      await LoadingOverlay.hide();
+      if (kDebugMode) print('Failed to update project: $e');
+
       Get.snackbar('Error', 'Failed to update project', colorText: Colors.red);
     }
   }
 
   Future<void> deleteProject(String projectId, String projectOwner) async {
+    Get.closeAllSnackbars();
+    LoadingOverlay.show();
     try {
       if (projectOwner != _authController.currentUser.value!.id) {
+        await LoadingOverlay.hide();
         Get.snackbar('Error', 'You are not the owner of this project',
-            colorText: Colors.red);
+            colorText: Colors.red, duration: const Duration(milliseconds: 600));
         return;
       } else {
         await _firestore.collection('projects').doc(projectId).delete();
+        await LoadingOverlay.hide();
         Get.snackbar('Success', 'Delete project success',
-            colorText: Colors.green);
+            colorText: Colors.green,
+            duration: const Duration(milliseconds: 600));
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to delete project', colorText: Colors.red);
+      await LoadingOverlay.hide();
+      if (kDebugMode) print('Delete project with error: $e');
+      Get.snackbar('Error', 'Failed to delete project',
+          colorText: Colors.red, duration: const Duration(seconds: 2));
     }
   }
 

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,11 +8,15 @@ import 'package:project_manager/controllers/auth/auth_controller.dart';
 import 'package:project_manager/controllers/project/add_project_controller.dart';
 import 'package:project_manager/controllers/project/project_controller.dart';
 import 'package:project_manager/models/project.dart';
+import 'package:project_manager/services/appwrite_service.dart';
+import 'package:project_manager/utils/color_utils.dart';
 import 'package:uuid/uuid.dart';
 
 // ignore: must_be_immutable
-class AddProjectScreen extends StatelessWidget {
-  AddProjectScreen({super.key});
+class AddModelScreen extends StatelessWidget {
+  AddModelScreen({super.key, required this.isAddProject});
+
+  final bool isAddProject;
 
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
@@ -23,8 +29,12 @@ class AddProjectScreen extends StatelessWidget {
   final AddProjectController addProjectController =
       Get.put(AddProjectController());
 
+  final AppwriteService appwriteService = AppwriteService();
+  final projectID = const Uuid().v4();
+
   final _formKey = GlobalKey<FormState>();
   final _formKey1 = GlobalKey<FormState>();
+  final RxList<String> attachments = <String>[].obs;
   var count = 0;
 
   @override
@@ -109,16 +119,18 @@ class AddProjectScreen extends StatelessWidget {
                                 initialTime: TimeOfDay.now(),
                               );
 
-                              DateTime pickedDateTime = DateTime(
-                                pickedDate.year,
-                                pickedDate.month,
-                                pickedDate.day,
-                                pickedTime?.hour ?? DateTime.now().hour,
-                                pickedTime?.minute ?? DateTime.now().minute,
-                              );
-                              startDateController.text =
-                                  DateFormat('MM/dd/yyyy, HH:mm')
-                                      .format(pickedDateTime);
+                              if (pickedTime != null) {
+                                DateTime pickedDateTime = DateTime(
+                                  pickedDate.year,
+                                  pickedDate.month,
+                                  pickedDate.day,
+                                  pickedTime.hour,
+                                  pickedTime.minute,
+                                );
+                                startDateController.text =
+                                    DateFormat('MM/dd/yyyy, HH:mm')
+                                        .format(pickedDateTime);
+                              }
                             }
                           },
                           onValidator: (value) {
@@ -148,15 +160,17 @@ class AddProjectScreen extends StatelessWidget {
                               TimeOfDay? pickedTime = await showTimePicker(
                                   context: context,
                                   initialTime: TimeOfDay.now());
-                              DateTime pickedDateTime = DateTime(
-                                  pickedDate.year,
-                                  pickedDate.month,
-                                  pickedDate.day,
-                                  pickedTime?.hour ?? TimeOfDay.now().hour,
-                                  pickedTime?.minute ?? TimeOfDay.now().minute);
-                              dueDateController.text =
-                                  DateFormat('MM/dd/yyyy, HH:mm')
-                                      .format(pickedDateTime);
+                              if (pickedTime != null) {
+                                DateTime pickedDateTime = DateTime(
+                                    pickedDate.year,
+                                    pickedDate.month,
+                                    pickedDate.day,
+                                    pickedTime.hour,
+                                    pickedTime.minute);
+                                dueDateController.text =
+                                    DateFormat('MM/dd/yyyy, HH:mm')
+                                        .format(pickedDateTime);
+                              }
                             }
                           },
                           onValidator: (value) {
@@ -335,6 +349,11 @@ class AddProjectScreen extends StatelessWidget {
                                       : CircleAvatar(
                                           backgroundColor: addProjectController
                                               .assignedForArr[index].color,
+                                          foregroundColor:
+                                              getContrastingTextColor(
+                                                  addProjectController
+                                                      .assignedForArr[index]
+                                                      .color!),
                                           child: Text(addProjectController
                                               .assignedForArr[index].name[0]
                                               .toUpperCase()),
@@ -418,9 +437,9 @@ class AddProjectScreen extends StatelessWidget {
                                             emailController.clear();
                                             Get.back();
                                             addProjectController.addUser(user);
-                                            Get.snackbar('Successful',
-                                                '${user.name} added to project',
-                                                colorText: Colors.green);
+                                            // Get.snackbar('Successful',
+                                            //     '${user.name} added to project',
+                                            //     colorText: Colors.green);
                                           } else {
                                             Get.snackbar('Error',
                                                 'This account does not exist',
@@ -477,19 +496,42 @@ class AddProjectScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 15),
+              const Divider(thickness: 0, height: 0),
+              const SizedBox(height: 15),
+              _customWidget(
+                icon: Icons.attachment_outlined,
+                title: 'Attachment',
+                color: const Color.fromARGB(255, 243, 106, 152),
+                isTextField: false,
+                onTap: () async {
+                  final fileId =
+                      await appwriteService.uploadFile(projectID, context);
+                  if (fileId != null) {
+                    attachments.add(fileId);
+                  }
+                },
+              ),
+              const SizedBox(height: 30),
+              Obx(() => ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: attachments.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        leading: Icon(getIconForAttachment(attachments[index])),
+                        title: Text(getFileName(attachments[index])),
+                      );
+                    },
+                  )),
               const SizedBox(height: 30),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: TextButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      final List<String> userIds = [];
-                      for (final user in addProjectController.assignedForArr) {
-                        userIds.add(user.id);
-                      }
                       await projectController.addProject(
                         Project(
-                          id: const Uuid().v4(),
+                          id: projectID,
                           title: titleController.text,
                           description: descriptionController.text,
                           status: Status.notStarted,
@@ -500,7 +542,10 @@ class AddProjectScreen extends StatelessWidget {
                           endDate: DateFormat('MM/dd/yyyy, HH:mm')
                               .parse(dueDateController.text),
                           taskIds: [],
-                          userIds: userIds,
+                          userIds: addProjectController.assignedForArr
+                              .map((user) => user.id)
+                              .toList(),
+                          attachments: attachments,
                           owner: authController.currentUser.value!.id,
                         ),
                       );
@@ -576,10 +621,13 @@ class AddProjectScreen extends StatelessWidget {
                     validator: onValidator,
                   ),
                 )
-              : Text(
-                  title,
-                  style: Get.textTheme.bodyLarge!.copyWith(
-                    fontWeight: FontWeight.bold,
+              : GestureDetector(
+                  onTap: onTap,
+                  child: Text(
+                    title,
+                    style: Get.textTheme.bodyLarge!.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
         ],
@@ -622,4 +670,29 @@ class AddProjectScreen extends StatelessWidget {
   // String getName(String name) {
   //   return '${name[0].toUpperCase()}${name.substring(1)}';
   // }
+
+  String getFileName(String url) {
+    return url.split('/').last.split("?").first;
+  }
+
+  IconData getIconForAttachment(String attachment) {
+    final extension = attachment.split('.').last.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return Icons.picture_as_pdf;
+      case 'doc':
+      case 'docx':
+        return Icons.description;
+      case 'xls':
+      case 'xlxs':
+        return Icons.grid_on;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+        return Icons.image;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
 }

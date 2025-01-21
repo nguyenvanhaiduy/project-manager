@@ -34,16 +34,18 @@ class MyApp extends StatelessWidget {
         appBarTheme: const AppBarTheme(backgroundColor: kbackgroundLightColor),
         scaffoldBackgroundColor: kbackgroundLightColor,
         textTheme: const TextTheme().copyWith(
-          bodyMedium: const TextStyle(
-            color: Colors.black,
-          ),
-          bodyLarge: const TextStyle(
-            color: Colors.black,
-          ),
-          bodySmall: const TextStyle(
-            color: Colors.black,
-          ),
-        ),
+            bodyMedium: const TextStyle(
+              color: Colors.black,
+            ),
+            bodyLarge: const TextStyle(
+              color: Colors.black,
+            ),
+            bodySmall: const TextStyle(
+              color: Colors.black,
+            ),
+            headlineLarge: const TextStyle(
+              color: Colors.black,
+            )),
         cardTheme: const CardTheme().copyWith(
           color: Colors.white,
         ),
@@ -61,7 +63,9 @@ class MyApp extends StatelessWidget {
           backgroundColor: kbackgroundLightColor,
         ),
         listTileTheme: const ListTileThemeData(
-          selectedColor: Colors.orange,
+          // selectedColor: Colors.amber,
+          selectedTileColor: Colors.orange,
+          selectedColor: Colors.black,
         ),
         textButtonTheme: TextButtonThemeData(
           style: ButtonStyle(
@@ -75,19 +79,21 @@ class MyApp extends StatelessWidget {
         appBarTheme: const AppBarTheme(backgroundColor: kbackgroundDarkColor),
         scaffoldBackgroundColor: kbackgroundDarkColor,
         textTheme: const TextTheme().copyWith(
-          bodyMedium: const TextStyle(
-            color: Colors.white,
-            // fontWeight: FontWeight.bold,
-          ),
-          bodyLarge: const TextStyle(
-            color: Colors.white,
-            // fontWeight: FontWeight.bold,
-          ),
-          bodySmall: const TextStyle(
-            color: Colors.white,
-            // fontWeight: FontWeight.bold,
-          ),
-        ),
+            bodyMedium: const TextStyle(
+              color: Colors.white,
+              // fontWeight: FontWeight.bold,
+            ),
+            bodyLarge: const TextStyle(
+              color: Colors.white,
+              // fontWeight: FontWeight.bold,
+            ),
+            bodySmall: const TextStyle(
+              color: Colors.white,
+              // fontWeight: FontWeight.bold,
+            ),
+            headlineLarge: const TextStyle(
+              color: Colors.white,
+            )),
         cardTheme: const CardTheme().copyWith(
           color: Colors.black54,
         ),
@@ -102,7 +108,9 @@ class MyApp extends StatelessWidget {
           ),
         ),
         listTileTheme: const ListTileThemeData(
-          selectedColor: Colors.amber,
+          // selectedColor: Colors.amber,
+          selectedTileColor: Colors.orange,
+          selectedColor: Colors.white,
         ),
         drawerTheme: const DrawerThemeData(
           backgroundColor: kbackgroundDarkColor,

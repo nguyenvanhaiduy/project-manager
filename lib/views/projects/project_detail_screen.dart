@@ -1,17 +1,20 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:project_manager/bindings/task_binding.dart';
 import 'package:project_manager/controllers/auth/auth_controller.dart';
 import 'package:project_manager/controllers/project/progress_project_controller.dart';
 import 'package:project_manager/controllers/project/project_controller.dart';
 import 'package:project_manager/controllers/theme_controller.dart';
 import 'package:project_manager/models/project.dart';
 import 'package:project_manager/models/user.dart';
+import 'package:project_manager/utils/color_utils.dart';
 import 'package:project_manager/views/projects/components/build_avatar.dart';
+import 'package:project_manager/views/tasks/task_screen.dart';
 import 'package:project_manager/views/widgets/widgets.dart';
 
 class ProjectDetailScreen extends StatelessWidget {
@@ -48,7 +51,7 @@ class ProjectDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  'delete users'.tr,
+                  'confirm delete'.tr,
                   style: Get.textTheme.bodyLarge!
                       .copyWith(fontWeight: FontWeight.bold),
                 ),
@@ -137,7 +140,7 @@ class ProjectDetailScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Project Detail'),
+        title: Text('project detail'.tr),
       ),
       body: SingleChildScrollView(
         child: Form(
@@ -267,7 +270,9 @@ class ProjectDetailScreen extends StatelessWidget {
                   children: [
                     Text(
                       'status'.tr,
-                      style: Get.textTheme.bodyLarge,
+                      style: Get.textTheme.bodyLarge!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Obx(
                       () => OutlinedButton(
@@ -331,7 +336,8 @@ class ProjectDetailScreen extends StatelessWidget {
                   children: [
                     Text(
                       'assigned for'.tr,
-                      style: Get.textTheme.bodyLarge,
+                      style: Get.textTheme.bodyLarge!
+                          .copyWith(fontWeight: FontWeight.bold),
                     ),
                     SizedBox(
                       height: 35,
@@ -394,7 +400,8 @@ class ProjectDetailScreen extends StatelessWidget {
                   children: [
                     Text(
                       'priority'.tr,
-                      style: Get.textTheme.bodyLarge,
+                      style: Get.textTheme.bodyLarge!
+                          .copyWith(fontWeight: FontWeight.bold),
                     ),
                     Obx(
                       () => OutlinedButton(
@@ -477,7 +484,8 @@ class ProjectDetailScreen extends StatelessWidget {
                                   : (Platform.isAndroid ? 200 : 180),
                               child: Text(
                                 'project completion progress!'.tr,
-                                style: Get.textTheme.bodyLarge,
+                                style: Get.textTheme.bodyLarge!
+                                    .copyWith(fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),
@@ -492,11 +500,13 @@ class ProjectDetailScreen extends StatelessWidget {
                                     : const Color.fromARGB(255, 207, 234, 248),
                               ),
                               onPressed: () {
-                                print(Get.size.width);
+                                Get.to(() => TaskScreen(),
+                                    binding: TaskBinding());
                               },
                               child: Text(
-                                'Xem chi tiết',
-                                style: Get.textTheme.bodyLarge,
+                                'view details'.tr,
+                                style: Get.textTheme.bodyLarge!
+                                    .copyWith(fontWeight: FontWeight.bold),
                               )),
                           const SizedBox(height: 15),
                         ],
@@ -524,7 +534,10 @@ class ProjectDetailScreen extends StatelessWidget {
                           ),
                           Positioned(
                             child: Text(
-                                '${(progressProjectController.currentValue.value * 100).toStringAsFixed(0)}%'),
+                              '${(progressProjectController.currentValue.value * 100).toStringAsFixed(0)}%',
+                              style: Get.textTheme.bodyLarge!
+                                  .copyWith(fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ],
                       ),
@@ -552,6 +565,7 @@ class ProjectDetailScreen extends StatelessWidget {
                                   .parse(dueDateController.text),
                               taskIds: project.taskIds,
                               userIds: listUsers,
+                              attachments: [],
                               owner: project.owner,
                             ),
                           );

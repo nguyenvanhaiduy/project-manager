@@ -4,6 +4,7 @@ import 'package:project_manager/controllers/auth/auth_controller.dart';
 import 'package:project_manager/controllers/auth/image_picker_controller.dart';
 import 'package:project_manager/controllers/theme_controller.dart';
 import 'package:project_manager/models/user.dart';
+import 'package:project_manager/utils/color_utils.dart';
 import 'package:project_manager/views/widgets/widgets.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -67,6 +68,8 @@ class ProfileScreen extends StatelessWidget {
                                   : CircleAvatar(
                                       radius: 50,
                                       backgroundColor: user.color,
+                                      foregroundColor:
+                                          getContrastingTextColor(user.color!),
                                       child: Text(
                                         _authController
                                             .currentUser.value!.name[0]

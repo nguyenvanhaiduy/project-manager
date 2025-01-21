@@ -77,7 +77,8 @@ class RegisterScreen extends StatelessWidget {
                     return null;
                   }, _themeController),
                   const SizedBox(height: 20),
-                  customTextField(context, _jobController, 'job', Icons.work,
+                  customTextField(
+                      context, _jobController, 'job', Icons.work_outline,
                       (value) {
                     if (value == null || value.isEmpty) {
                       return 'you must enter your job'.tr;

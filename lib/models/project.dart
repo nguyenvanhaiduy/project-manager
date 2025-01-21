@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 
@@ -13,6 +12,7 @@ class Project {
   final DateTime endDate;
   final List<String> taskIds; // Lưu ID của Task
   final List<String> userIds; // Lưu ID của User
+  final List<String> attachments;
   final String owner; // Lưu ID của người tạo Project
 
   Project({
@@ -25,6 +25,7 @@ class Project {
     required this.endDate,
     required this.taskIds,
     required this.userIds,
+    required this.attachments,
     required this.owner,
   }) : id = id ?? const Uuid().v4();
 
@@ -42,6 +43,7 @@ class Project {
       endDate: (data['endDate'] as Timestamp).toDate(),
       taskIds: List<String>.from(data['tasks'] ?? []),
       userIds: List<String>.from(data['users'] ?? []),
+      attachments: List<String>.from(data['attachments'] ?? []),
       owner: data['owner'],
     );
   }
@@ -57,9 +59,16 @@ class Project {
       'endDate': Timestamp.fromDate(endDate),
       'tasks': taskIds,
       'users': userIds,
+      'attachments': attachments,
       'owner': owner,
     };
   }
+
+  // @override
+  // int compareTo(Project other) {
+  //   print("$status  ${other.status}");
+  //   return status.index.compareTo(other.status.index);
+  // }
 }
 
 enum Status {
@@ -74,34 +83,4 @@ enum Priority {
   low,
   medium,
   high,
-}
-
-Color getStatusColor(Status status) {
-  switch (status) {
-    case Status.notStarted:
-      return Colors.grey;
-    case Status.inProgress:
-      return Colors.blue;
-    case Status.completed:
-      return Colors.green;
-    case Status.lateCompleted:
-      return Colors.orange;
-    case Status.cancelled:
-      return Colors.red;
-    default:
-      return Colors.black;
-  }
-}
-
-Color getPriorityColor(Priority priority) {
-  switch (priority) {
-    case Priority.low:
-      return Colors.green;
-    case Priority.medium:
-      return Colors.yellow[700]!;
-    case Priority.high:
-      return Colors.red;
-    default:
-      return Colors.black;
-  }
 }

@@ -98,7 +98,18 @@ const Map<String, String> enUs = {
   'project completion progress!': 'Project completion progress!',
   'yes': 'Yes',
   'no': 'No',
-  'delete users': 'Delete users',
+  'confirm delete': 'Confirm Delete',
   'are you sure you want to delete': 'Are you sure you want to delete ',
   'out of the project?': ' out of the project?',
+  'no project yet': 'Oh!!!.You don\'t have any projects yet',
+  'delete': 'Delete',
+  'cancel': 'Cancel',
+  'are you sure want to delete this project?':
+      'Are you sure want to delete this project?',
+  'view details': 'View details',
+  'no task yet': 'Oh!!!.You don\'t have any tasks yet',
+  'project detail': 'Project Detail',
+  'your task': 'Your task',
+  'task detail': 'Task Detail',
+  'create task': 'Create Task'
 };

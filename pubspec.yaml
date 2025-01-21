@@ -56,6 +56,7 @@ dependencies:
   http: ^1.2.2
   flutter_local_notifications: ^18.0.1
   mailer: ^6.3.0
+  appwrite: ^12.0.4
 
 
 dev_dependencies:
